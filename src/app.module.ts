@@ -12,6 +12,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { FriendModule } from './modules/friend/friend.module';
 import { GroupModule } from './modules/group/group.module';
 import { UserModule } from './modules/user/user.module';
+import { AwsModule } from './modules/aws/aws.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { UserModule } from './modules/user/user.module';
     FriendModule,
     GroupModule,
     UserModule,
+    AwsModule,
   ],
   controllers: [AppController],
   providers: [

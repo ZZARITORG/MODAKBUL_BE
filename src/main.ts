@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const PORT = process.env.PORT || 3000;
 
   app.setGlobalPrefix('api/v0');
   const config = new DocumentBuilder().setTitle('MODAKBUL SERVICE DOCS').setVersion('1.0').build();
@@ -13,6 +14,6 @@ async function bootstrap() {
       persistAuthorization: true,
     },
   });
-  await app.listen(3000);
+  await app.listen(PORT);
 }
 bootstrap();
