@@ -11,7 +11,7 @@ export class User extends BaseTable {
   id: string;
 
   @Column({ name: 'user_name', comment: '유저 이름' })
-  userName: string;
+  name: string;
 
   @Column({ name: 'phone_no', comment: '전화번호' })
   phoneNo: string;
