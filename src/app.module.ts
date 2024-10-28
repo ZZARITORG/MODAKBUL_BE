@@ -1,7 +1,7 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging-interceptor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CustomExceptionFilter } from './common/filters/exception-filter';
@@ -14,6 +14,8 @@ import { GroupModule } from './modules/group/group.module';
 import { UserModule } from './modules/user/user.module';
 import { AwsModule } from './modules/aws/aws.module';
 import { indexEntities } from './common/db/index.entities';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthGuard } from './common/gurad/auth.guard';
 
 @Module({
   imports: [
@@ -40,6 +42,15 @@ import { indexEntities } from './common/db/index.entities';
 
       inject: [ConfigService],
     }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (cnf: ConfigService) => ({
+        secret: cnf.get('JWT_SECRET_KEY'),
+        signOptions: { expiresIn: '30m' },
+      }),
+      global: true,
+    }),
     TypeOrmModule.forFeature(),
     AuthModule,
     MeetingModule,
@@ -52,6 +63,7 @@ import { indexEntities } from './common/db/index.entities';
   controllers: [AppController],
   providers: [
     AppService,
+
     {
       provide: APP_FILTER,
       useClass: CustomExceptionFilter,
@@ -68,6 +80,10 @@ import { indexEntities } from './common/db/index.entities';
           transform: true,
         });
       },
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
     },
   ],
 })
