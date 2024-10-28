@@ -1,7 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 @Injectable()
@@ -21,26 +20,25 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(request);
+    console.log(request.headers);
+    const authHeader = request.headers['authorization'];
 
-    if (!token) {
-      throw new UnauthorizedException();
+    if (!authHeader) {
+      throw new UnauthorizedException('헤더에 토큰이 없습니다.');
     }
+
+    const [bearer, token] = authHeader.split(' ');
+
+    if (bearer !== 'Bearer') {
+      throw new UnauthorizedException('토큰 형식이 Bearer로 시작해야 합니다.');
+    }
+
     try {
-      const payload = await this.jwtService.verifyAsync(token);
-
-      request['user'] = payload;
-    } catch {
-      throw new UnauthorizedException();
+      const decoded = await this.jwtService.verifyAsync(token);
+      request.user = decoded;
+      return true;
+    } catch (err) {
+      throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
-    return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const cookie = request.headers.cookie;
-
-    const [type, token] = cookie?.split('=') ?? [];
-
-    return type === 'token' ? token : undefined;
   }
 }
