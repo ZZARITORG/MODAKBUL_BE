@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import BaseTable from './base.entity';
 import { User } from './user.entity';
 
@@ -10,10 +10,11 @@ export class Group extends BaseTable {
   @Column({ name: 'name', comment: '그룹명' })
   name: string;
 
-  @Column({ name: 'last_meeting_date', comment: '마지막모닥불 시간', nullable: true })
-  lastMeetingDate: Date;
+  @ManyToOne(() => User, (user) => user.groups)
+  @JoinColumn({ name: 'owner_id' })
+  owner: User;
 
-  @OneToMany(() => User, (user) => user.id)
-  @JoinColumn({ name: 'user_id' })
-  users: User[];
+  @OneToMany(() => User, (user) => user.group)
+  @JoinColumn({ name: 'member_id' })
+  members: User[];
 }

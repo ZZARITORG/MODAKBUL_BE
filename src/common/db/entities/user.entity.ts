@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 import BaseTable from './base.entity';
 import { Group } from './group.entity';
 import { UserMeetingRelation } from './user-meeting-relation.entity';
@@ -30,11 +30,15 @@ export class User extends BaseTable {
   @JoinColumn({ name: 'friendship_id' })
   friendship: FriendShip[];
 
-  @OneToMany(() => Group, (group) => group.id, { onDelete: 'CASCADE' })
+  @OneToMany(() => Group, (group) => group.owner, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'group_id' })
   groups: Group[];
 
   @OneToMany(() => Notification, (notification) => notification.id)
   @JoinColumn({ name: 'notification_id' })
   notifications: Notification[];
+
+  @ManyToOne(() => Group, (group) => group.members)
+  @JoinColumn({ name: 'user_id' })
+  group: Group;
 }

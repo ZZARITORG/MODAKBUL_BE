@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/common/db/entities/user.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { SignUpReqDto } from '../auth/dtos/signup-req-dto';
 export const USER_REPO = 'USER_REPO';
 
@@ -13,6 +13,12 @@ export class UserRepository extends Repository<User> {
   async findUserById(id: string) {
     return this.createQueryBuilder().where('id = :id', { id }).getOne();
   }
+  async findUsersByIds(ids: string[]) {
+    return await this.findBy({
+      id: In(ids),
+    });
+  }
+
   async saveUser(signUpReqDto: SignUpReqDto) {
     const user = this.create({
       id: signUpReqDto.id,
