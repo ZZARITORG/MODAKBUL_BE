@@ -17,6 +17,7 @@ import { indexEntities } from './common/db/index.entities';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './common/gurad/auth.guard';
 
+//TODO 한국시간으로 저장
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -34,7 +35,7 @@ import { AuthGuard } from './common/gurad/auth.guard';
           password: configService.get<string>('DB_PASSWORD'),
           port: configService.get<number>('DB_PORT'),
           entities: [...indexEntities],
-          timezone: 'z',
+          timezone: '+09:00',
           synchronize: synchronize,
           logging: env === 'local' ? true : false,
         };

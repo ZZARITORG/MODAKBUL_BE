@@ -12,7 +12,7 @@ export class AuthService {
 
   async signUp(signUpReqDto: SignUpReqDto) {
     //아이디 중복 체크
-    const existingAdmin = await this.userRepo.findUserById(signUpReqDto.id);
+    const existingAdmin = await this.userRepo.findUserByUserId(signUpReqDto.userId);
     if (existingAdmin) {
       throw new BadRequestException('이미 가입된 아이디입니다.');
     }

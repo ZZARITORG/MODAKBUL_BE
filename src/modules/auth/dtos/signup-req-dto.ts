@@ -5,7 +5,7 @@ export class SignUpReqDto {
   @ApiProperty({ description: '아이디' })
   @IsString()
   @IsNotEmpty()
-  id: string;
+  userId: string;
 
   @ApiProperty({ description: '이름' })
   @IsString()

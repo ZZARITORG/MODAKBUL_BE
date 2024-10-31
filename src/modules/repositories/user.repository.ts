@@ -18,10 +18,13 @@ export class UserRepository extends Repository<User> {
       id: In(ids),
     });
   }
+  async findUserByUserId(userId: string) {
+    return this.createQueryBuilder().where('user_id = :userId', { userId }).getOne();
+  }
 
   async saveUser(signUpReqDto: SignUpReqDto) {
     const user = this.create({
-      id: signUpReqDto.id,
+      userId: signUpReqDto.userId,
       name: signUpReqDto.name,
       phoneNo: signUpReqDto.phoneNo,
       profileUrl: signUpReqDto.profileUrl,
