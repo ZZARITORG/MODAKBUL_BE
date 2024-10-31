@@ -1,20 +1,23 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Group } from 'src/common/db/entities/group.entity';
+import { Group, GroupMember } from 'src/common/db/entities/group.entity';
 import { CreateGroupReqDto } from '../group/dtos/create-group-req.dto';
 import { USER_REPO, UserRepository } from './user.repository';
 export const GROUP_REPO = 'GROUP_REPO';
 
 @Injectable()
 export class GroupRepository extends Repository<Group> {
+  private readonly groupMemberRepository: Repository<GroupMember>;
   constructor(
     @Inject(USER_REPO) private readonly userRepo: UserRepository,
     private dataSource: DataSource,
   ) {
     super(Group, dataSource.createEntityManager());
+    this.groupMemberRepository = dataSource.getRepository(GroupMember);
   }
 
   async saveGroup(createGroupReqDto: CreateGroupReqDto, userId: string) {
+    //사용자 찾기
     const owner = await this.userRepo.findOne({
       where: { id: userId },
     });
@@ -23,27 +26,62 @@ export class GroupRepository extends Repository<Group> {
       throw new NotFoundException('요청을 보낸 사용자 정보가 없습니다.');
     }
 
-    console.log(owner);
-
-    // 2. 멤버 조회
+    //그룹에 포함되는 친구리스트 찾기
     const members = await this.userRepo.findUsersByIds(createGroupReqDto.friendIds);
 
-    console.log(members);
+    if (members.length !== createGroupReqDto.friendIds.length) {
+      throw new NotFoundException('특정 사용자 정보가 없습니다.');
+    }
 
-    // 3. 그룹 생성
+    //그룹생성
     const group = this.create({
       name: createGroupReqDto.groupName,
       owner: owner,
-      members: members,
     });
 
-    // 4. 저장
     const savedGroup = await this.save(group);
 
-    // 5. 관계 데이터와 함께 조회하여 반환
-    return await this.findOne({
-      where: { id: savedGroup.id },
-      relations: ['owner', 'members'],
+    //그룹멤버생성
+    const groupMembers = members.map((member) => {
+      return this.groupMemberRepository.create({
+        group: savedGroup,
+        user: member,
+      });
     });
+
+    await this.groupMemberRepository.save(groupMembers);
+
+    //생성된 그룹 조회해서 반환
+    return await this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.owner', 'owner')
+      .leftJoinAndSelect('group.members', 'groupMember')
+      .leftJoinAndSelect('groupMember.user', 'user')
+      .where('group.id = :id', { id: savedGroup.id })
+      .getOne();
+  }
+
+  async finAllGroup(targetId: string) {
+    //사용자의 모든 그룹 조회
+    return this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'groupMember')
+      .leftJoinAndSelect('groupMember.user', 'user')
+      .select([
+        'group.id',
+        'group.createdAt',
+        'group.name',
+        'groupMember.id',
+        'user.id',
+        'user.userId',
+        'user.name',
+        'user.profileUrl',
+      ])
+      .where('group.owner = :targetId', { targetId })
+      .orderBy('group.createdAt', 'DESC')
+      .getMany();
+  }
+
+  async deleteOneGroup(groupId: string) {
+    //특정 그룹 삭제
+    return await this.createQueryBuilder('group').delete().from(Group).where('id = :groupId', { groupId }).execute();
   }
 }

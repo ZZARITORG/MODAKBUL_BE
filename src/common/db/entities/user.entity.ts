@@ -1,14 +1,18 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import BaseTable from './base.entity';
-import { Group } from './group.entity';
+import { Group, GroupMember } from './group.entity';
 import { UserMeetingRelation } from './user-meeting-relation.entity';
 import { FriendShip } from './friendship.entity';
 import { Notification } from './notification.entitiy';
 
+//TODO 유니크 옵션 추가
 @Entity()
 export class User extends BaseTable {
-  @PrimaryColumn({ name: 'id', comment: '아이디' })
+  @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column({ name: 'user_id', comment: '아이디' })
+  userId: string;
 
   @Column({ name: 'user_name', comment: '유저 이름' })
   name: string;
@@ -24,7 +28,7 @@ export class User extends BaseTable {
 
   @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.id)
   @JoinColumn({ name: 'meeting_relation_id' })
-  meeetingRelation: UserMeetingRelation[];
+  meetingRelation: UserMeetingRelation[];
 
   @OneToMany(() => FriendShip, (friendship) => friendship.id)
   @JoinColumn({ name: 'friendship_id' })
@@ -37,8 +41,4 @@ export class User extends BaseTable {
   @OneToMany(() => Notification, (notification) => notification.id)
   @JoinColumn({ name: 'notification_id' })
   notifications: Notification[];
-
-  @ManyToOne(() => Group, (group) => group.members)
-  @JoinColumn({ name: 'user_id' })
-  group: Group;
 }

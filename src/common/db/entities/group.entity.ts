@@ -14,7 +14,21 @@ export class Group extends BaseTable {
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @OneToMany(() => User, (user) => user.group)
+  @OneToMany(() => GroupMember, (groupMember) => groupMember.group)
   @JoinColumn({ name: 'member_id' })
-  members: User[];
+  members: GroupMember[];
+}
+
+@Entity('group_member')
+export class GroupMember extends BaseTable {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => Group, (group) => group.members)
+  @JoinColumn({ name: 'group_id' })
+  group: Group;
+
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }
