@@ -3,7 +3,6 @@ import { DataSource, Repository } from 'typeorm';
 import { Group, GroupMember } from 'src/common/db/entities/group.entity';
 import { CreateGroupReqDto } from '../group/dtos/create-group-req.dto';
 import { USER_REPO, UserRepository } from './user.repository';
-import _ from 'lodash';
 export const GROUP_REPO = 'GROUP_REPO';
 
 @Injectable()
@@ -90,11 +89,15 @@ export class GroupRepository extends Repository<Group> {
   }
 
   async updateGroup(group: Group, updateGroupReqDto: CreateGroupReqDto) {
+    //그룹명 업데이트
     if (updateGroupReqDto.groupName) {
-      //그룹명 업데이트
       group.name = updateGroupReqDto.groupName;
     }
-    if (!_.isEmpty(updateGroupReqDto.friendIds)) {
+    const savedGroup = await this.save(group);
+
+    //그룹멤버 업데이트
+    if (updateGroupReqDto.friendIds.length > 0) {
+      console.log('진입');
       //기존 그룹멤버 삭제
       await this.createQueryBuilder()
         .delete()
@@ -102,11 +105,11 @@ export class GroupRepository extends Repository<Group> {
         .where('group_id = :groupId', { groupId: group.id })
         .execute();
 
-      //업데이트할 그룹멤버 생성
       const members = await this.userRepo.findUsersByIds(updateGroupReqDto.friendIds);
       if (members.length !== updateGroupReqDto.friendIds.length) {
         throw new NotFoundException('특정 사용자 정보가 없습니다.');
       }
+      console.log('멤버', members);
       const groupMembers = members.map((member) => {
         return this.groupMemberRepository.create({
           group: group,
@@ -114,12 +117,18 @@ export class GroupRepository extends Repository<Group> {
         });
       });
 
+      console.log('그룹멤버', groupMembers);
+
       //그룹멤버 저장
       await this.groupMemberRepository.save(groupMembers);
     }
 
-    //그룹 엡데이트
-    return await this.save(group);
+    return await this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.owner', 'owner')
+      .leftJoinAndSelect('group.members', 'groupMember')
+      .leftJoinAndSelect('groupMember.user', 'user')
+      .where('group.id = :id', { id: savedGroup.id })
+      .getOne();
   }
 
   async deleteOneGroup(groupId: string) {

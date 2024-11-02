@@ -18,6 +18,8 @@ export class GroupService {
   async updateGroup(groupId: string, updateGroupDto: CreateGroupReqDto) {
     const group = await this.groupRepo.findOneGroup(groupId);
 
+    console.log('그룹', group);
+
     if (!group) {
       throw new NotFoundException('그룹 정보가 없습니다.');
     }
