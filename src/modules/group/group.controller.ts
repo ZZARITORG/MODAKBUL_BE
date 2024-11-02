@@ -19,6 +19,7 @@ export class GroupController {
 
   @Put(':groupId')
   updateGroup(@Param('groupId') groupId: string, @Body() updateGroupDto: CreateGroupReqDto) {
+    console.log('앙', groupId);
     return this.groupService.updateGroup(groupId, updateGroupDto);
   }
 
