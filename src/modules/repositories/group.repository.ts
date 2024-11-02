@@ -3,6 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Group, GroupMember } from 'src/common/db/entities/group.entity';
 import { CreateGroupReqDto } from '../group/dtos/create-group-req.dto';
 import { USER_REPO, UserRepository } from './user.repository';
+import _ from 'lodash';
 export const GROUP_REPO = 'GROUP_REPO';
 
 @Injectable()
@@ -60,6 +61,14 @@ export class GroupRepository extends Repository<Group> {
       .getOne();
   }
 
+  async findOneGroup(groupId: string) {
+    return await this.createQueryBuilder('group')
+      .leftJoinAndSelect('group.members', 'groupMember')
+      .leftJoinAndSelect('groupMember.user', 'user')
+      .where('group.id = :groupId', { groupId })
+      .getOne();
+  }
+
   async finAllGroup(targetId: string) {
     //사용자의 모든 그룹 조회
     return this.createQueryBuilder('group')
@@ -78,6 +87,39 @@ export class GroupRepository extends Repository<Group> {
       .where('group.owner = :targetId', { targetId })
       .orderBy('group.createdAt', 'DESC')
       .getMany();
+  }
+
+  async updateGroup(group: Group, updateGroupReqDto: CreateGroupReqDto) {
+    if (updateGroupReqDto.groupName) {
+      //그룹명 업데이트
+      group.name = updateGroupReqDto.groupName;
+    }
+    if (!_.isEmpty(updateGroupReqDto.friendIds)) {
+      //기존 그룹멤버 삭제
+      await this.createQueryBuilder()
+        .delete()
+        .from(GroupMember)
+        .where('group_id = :groupId', { groupId: group.id })
+        .execute();
+
+      //업데이트할 그룹멤버 생성
+      const members = await this.userRepo.findUsersByIds(updateGroupReqDto.friendIds);
+      if (members.length !== updateGroupReqDto.friendIds.length) {
+        throw new NotFoundException('특정 사용자 정보가 없습니다.');
+      }
+      const groupMembers = members.map((member) => {
+        return this.groupMemberRepository.create({
+          group: group,
+          user: member,
+        });
+      });
+
+      //그룹멤버 저장
+      await this.groupMemberRepository.save(groupMembers);
+    }
+
+    //그룹 엡데이트
+    return await this.save(group);
   }
 
   async deleteOneGroup(groupId: string) {

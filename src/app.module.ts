@@ -25,7 +25,7 @@ import { AuthGuard } from './common/gurad/auth.guard';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
         const env = configService.get<string>('NODE_ENV');
-        const synchronize = configService.get<boolean>('DB_SYNC_OPTION');
+        const synchronize = configService.get<string>('DB_SYNC_OPTION') === 'true';
 
         return {
           type: 'postgres',

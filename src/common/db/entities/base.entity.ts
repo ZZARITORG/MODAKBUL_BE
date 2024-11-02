@@ -1,4 +1,4 @@
-import { CreateDateColumn, DeleteDateColumn, UpdateDateColumn } from 'typeorm';
+import { CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 abstract class BaseTable {
   @CreateDateColumn({
@@ -15,12 +15,5 @@ abstract class BaseTable {
     comment: '업데이트 시간',
   })
   updatedAt: Date;
-
-  @DeleteDateColumn({
-    name: 'deleted_at',
-    nullable: true,
-    comment: '삭제 시간',
-  })
-  deletedAt: Date;
 }
 export default BaseTable;

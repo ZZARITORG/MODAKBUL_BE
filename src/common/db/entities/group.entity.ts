@@ -10,11 +10,15 @@ export class Group extends BaseTable {
   @Column({ name: 'name', comment: '그룹명' })
   name: string;
 
-  @ManyToOne(() => User, (user) => user.groups)
+  @ManyToOne(() => User, (user) => user.groups, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'owner_id' })
   owner: User;
 
-  @OneToMany(() => GroupMember, (groupMember) => groupMember.group)
+  @OneToMany(() => GroupMember, (groupMember) => groupMember.group, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'member_id' })
   members: GroupMember[];
 }
@@ -24,11 +28,11 @@ export class GroupMember extends BaseTable {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Group, (group) => group.members)
+  @ManyToOne(() => Group, (group) => group.members, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'group_id' })
   group: Group;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, (user) => user.groupMembers)
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
