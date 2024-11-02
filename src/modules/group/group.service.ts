@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGroupReqDto } from './dtos/create-group-req.dto';
 import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
 
@@ -14,5 +14,14 @@ export class GroupService {
   }
   async deleteGroup(groupId: string) {
     return await this.groupRepo.deleteOneGroup(groupId);
+  }
+  async updateGroup(groupId: string, updateGroupDto: CreateGroupReqDto) {
+    const group = await this.groupRepo.findOneGroup(groupId);
+
+    if (!group) {
+      throw new NotFoundException('그룹 정보가 없습니다.');
+    }
+
+    return await this.groupRepo.updateGroup(group, updateGroupDto);
   }
 }

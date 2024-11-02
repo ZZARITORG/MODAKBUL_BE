@@ -12,4 +12,3 @@ export class CreateGroupReqDto {
   @IsNotEmpty()
   friendIds: string[];
 }
-// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6InNxd3FmcXdmd3FmIiwiaWF0IjoxNzMwMjkyMTQ1LCJleHAiOjE3MzI4ODQxNDV9.b4h67KDool0mrWH7N6UiTILgq_KbmU5kvUMhGu2ebtI

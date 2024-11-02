@@ -24,7 +24,7 @@ export class AuthController {
 
   @Public()
   @Post('refresh-token')
-  async getAccessToken(@Body() refreshToeknReqDto: RefreshTokenReqDto) {
-    return await this.authService.refreshAccessToken(refreshToeknReqDto.refreshToken);
+  async getAccessToken(@Body() refreshTokenReqDto: RefreshTokenReqDto) {
+    return await this.authService.refreshAccessToken(refreshTokenReqDto.refreshToken);
   }
 }
