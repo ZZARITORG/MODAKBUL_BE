@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import BaseTable from './base.entity';
 import { User } from './user.entity';
 
-enum FriendStatus {
+export enum FriendStatus {
   PENDING = 'PENDING',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
