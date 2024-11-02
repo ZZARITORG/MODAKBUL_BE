@@ -1,16 +1,10 @@
 import { Module } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { FriendController } from './friend.controller';
-import { USER_REPO, UserRepository } from '../repositories/user.repository';
+import { FriendRepository } from '../repositories/friend.repository';
 
 @Module({
-  providers: [
-    FriendService,
-    {
-      provide: USER_REPO,
-      useClass: UserRepository,
-    },
-  ],
+  providers: [FriendService, FriendRepository],
   controllers: [FriendController],
 })
 export class FriendModule {}
