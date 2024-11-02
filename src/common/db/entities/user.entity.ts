@@ -1,11 +1,10 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import BaseTable from './base.entity';
 import { Group, GroupMember } from './group.entity';
 import { UserMeetingRelation } from './user-meeting-relation.entity';
 import { FriendShip } from './friendship.entity';
 import { Notification } from './notification.entitiy';
 
-//TODO 유니크 옵션 추가
 @Entity()
 export class User extends BaseTable {
   @PrimaryGeneratedColumn('uuid')
@@ -26,7 +25,7 @@ export class User extends BaseTable {
   @Column({ name: 'fcm_token', comment: 'FCM 토큰' })
   fcmToken: string;
 
-  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.id)
+  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'meeting_relation_id' })
   meetingRelation: UserMeetingRelation[];
 
@@ -38,7 +37,10 @@ export class User extends BaseTable {
   @JoinColumn({ name: 'group_id' })
   groups: Group[];
 
-  @OneToMany(() => Notification, (notification) => notification.id)
+  @OneToMany(() => Notification, (notification) => notification.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'notification_id' })
   notifications: Notification[];
+
+  @OneToMany(() => GroupMember, (groupMember) => groupMember.user, { onDelete: 'CASCADE' })
+  groupMembers: GroupMember[];
 }

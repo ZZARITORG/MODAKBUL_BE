@@ -35,4 +35,8 @@ export class UserRepository extends Repository<User> {
 
     return result;
   }
+
+  async deleteUser(targetId: string) {
+    return await this.delete({ id: targetId });
+  }
 }

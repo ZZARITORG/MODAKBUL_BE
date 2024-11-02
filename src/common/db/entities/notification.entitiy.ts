@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import BaseTable from './base.entity';
+import { User } from './user.entity';
 
 @Entity()
 export class Notification extends BaseTable {
@@ -14,4 +15,9 @@ export class Notification extends BaseTable {
 
   @Column({ name: 'profile_url', comment: '프로필 URL', nullable: true })
   profileUrl: string;
+
+  @ManyToOne(() => User, (user) => user.notifications, {
+    onDelete: 'CASCADE',
+  })
+  user: User;
 }
