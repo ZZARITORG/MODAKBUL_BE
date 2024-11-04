@@ -5,14 +5,15 @@ import { FriendAcptDto } from './dtos/friend-acpt-dto';
 import { FriendBlockDto } from './dtos/friend-block-dto';
 import { FriendRejectDto } from './dtos/friend-reject-dto';
 import { GetFriendsDto } from './dtos/friend-list-dto';
+import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 
 @Controller('friend')
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
   @Post('friend-request')
-  async friendReq(@Body() friendReqDto: FriendReqDto) {
-    return await this.friendService.friendReq(friendReqDto);
+  async friendReq(@Body() friendReqDto: FriendReqDto, @CurrentUser() sourceId: string) {
+    return await this.friendService.friendReq(friendReqDto, sourceId);
   }
   @Post('friend-accept')
   async acceptFriendReq(@Body() friendAcptDto: FriendAcptDto) {

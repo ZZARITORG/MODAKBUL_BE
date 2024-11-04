@@ -82,10 +82,10 @@ import { AuthGuard } from './common/gurad/auth.guard';
         });
       },
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AuthGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
   ],
 })
 export class AppModule {}

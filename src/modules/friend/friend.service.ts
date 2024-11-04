@@ -11,8 +11,8 @@ import { FriendInfoDto } from './dtos/friend-info-dto';
 @Injectable()
 export class FriendService {
   constructor(private readonly friendRepository: FriendRepository) {}
-  async friendReq(friendReqDto: FriendReqDto): Promise<FriendShip> {
-    return this.friendRepository.addFriendship(friendReqDto);
+  async friendReq(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip> {
+    return this.friendRepository.addFriendship(friendReqDto, sourceId);
   }
   async friendAcpt(friendAcptDto: FriendAcptDto): Promise<FriendShip> {
     return this.friendRepository.acptFriendship(friendAcptDto);

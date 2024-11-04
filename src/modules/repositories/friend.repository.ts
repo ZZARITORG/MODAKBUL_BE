@@ -14,8 +14,9 @@ export class FriendRepository extends Repository<FriendShip> {
     super(FriendShip, dataSource.createEntityManager());
   }
 
-  async addFriendship(friendReqDto: FriendReqDto): Promise<FriendShip | null> {
-    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { userId: friendReqDto.source_id } });
+  async addFriendship(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip | null> {
+    this.logger.log(`우오오오오ㅗㅇ오: ${JSON.stringify(sourceId)}`);
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { userId: friendReqDto.target_id } });
 
     this.logger.log(`Source User: ${JSON.stringify(sourceUser.id)}`);
