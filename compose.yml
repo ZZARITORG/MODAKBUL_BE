@@ -2,9 +2,7 @@ version: '3.1'
 
 services:
   nestjs:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: amadu12/modakbul:latest
     ports:
       - '3000:3000'
     volumes:

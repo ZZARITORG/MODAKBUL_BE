@@ -14,11 +14,15 @@ export class FriendShip extends BaseTable {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'source_id' })
   source: User;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'target_id' })
   target: User;
 
