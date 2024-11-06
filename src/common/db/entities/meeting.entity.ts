@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import BaseTable from './base.entity';
+import { UserMeetingRelation } from './user-meeting-relation.entity';
 
 @Entity()
 export class Meeting extends BaseTable {
@@ -15,10 +16,10 @@ export class Meeting extends BaseTable {
   @Column({ name: 'host_id', comment: '호스트 아이디' })
   hostId: string;
 
-  @Column({ name: 'location', comment: '위치' })
+  @Column({ name: 'location', comment: '장소명' })
   location: string;
 
-  @Column({ name: 'address', comment: '주소' })
+  @Column({ name: 'address', comment: '도로명주소' })
   address: string;
 
   @Column({ name: 'detailAddress', comment: '상세 주소', nullable: true })
@@ -26,4 +27,7 @@ export class Meeting extends BaseTable {
 
   @Column({ name: 'date', comment: '약속시간', type: 'timestamp' })
   date: Date;
+
+  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.meeting)
+  userMeetingRelations: UserMeetingRelation[];
 }

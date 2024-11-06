@@ -25,7 +25,7 @@ export class User extends BaseTable {
   @Column({ name: 'fcm_token', comment: 'FCM 토큰' })
   fcmToken: string;
 
-  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.id, { onDelete: 'CASCADE' })
+  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.user, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'meeting_relation_id' })
   meetingRelation: UserMeetingRelation[];
 
