@@ -6,6 +6,8 @@ import { User } from 'src/common/db/entities/user.entity';
 import { FriendBlockDto } from '../friend/dtos/friend-block-dto';
 import { FriendAcptDto } from '../friend/dtos/friend-acpt-dto';
 import { FriendInfoDto } from '../friend/dtos/friend-info-dto';
+import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
+import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
 
 @Injectable()
 export class FriendRepository extends Repository<FriendShip> {
@@ -13,7 +15,23 @@ export class FriendRepository extends Repository<FriendShip> {
   constructor(private dataSource: DataSource) {
     super(FriendShip, dataSource.createEntityManager());
   }
+  private async createNotification(
+    sourceUserId: string,
+    targetUserId: string,
+    type: NotificationType,
+    meetingId?: string,
+  ): Promise<void> {
+    const notificationRepository = this.dataSource.getRepository(Notification); // Notification 레포지토리 가져오기
+    const notification = notificationRepository.create({
+      type: type, // 알림 타입 설정
+      sourceUser: { id: sourceUserId }, // 친구 요청을 보낸 사람의 UUID
+      targetUser: { id: targetUserId }, // 요청을 받은 사람의 UUID
+      meetingId, // 약속 UUID (옵션)
+    });
 
+    await notificationRepository.save(notification); // 알림 저장
+    this.logger.log(`알림이 생성되었습니다: ${JSON.stringify(notification)}`); // 로그에 알림 정보 기록
+  }
   async addFriendship(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip | null> {
     this.logger.log(`우오오오오ㅗㅇ오: ${JSON.stringify(sourceId)}`);
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
@@ -55,6 +73,7 @@ export class FriendRepository extends Repository<FriendShip> {
         status: FriendStatus.PENDING, // 최초 상태로 PENDING 설정
       });
       this.logger.log(`새로운 친구 요청을 생성합니다: ${JSON.stringify(friendship)}`);
+      await this.createNotification(sourceUser.id, targetUser.id, NotificationType.FRIEND_REQUEST); // 알림 생성
       return await this.save(friendship);
     }
   }
@@ -111,6 +130,26 @@ export class FriendRepository extends Repository<FriendShip> {
         { source: { id: targetId }, target: { id: sourceId }, status: status },
       ],
     });
+  }
+
+  // 친구 삭제 메소드
+  async removeFriendship(friendDeleteDto: FriendDeleteDto): Promise<void> {
+    const sourceUser = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { userId: friendDeleteDto.source_id } });
+    const targetUser = await this.dataSource
+      .getRepository(User)
+      .findOne({ where: { userId: friendDeleteDto.target_id } });
+
+    const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.ACCEPTED);
+
+    if (!friendship) {
+      this.logger.log(`친구 관계가 존재하지 않습니다.`);
+      throw new NotFoundException('Friendship not found');
+    }
+
+    await this.remove(friendship); // 친구 관계 삭제
+    this.logger.log(`친구 관계가 삭제되었습니다: ${JSON.stringify(friendship)}`);
   }
   async getFriends(userId: string): Promise<FriendInfoDto[]> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { userId: userId } });
