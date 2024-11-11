@@ -28,6 +28,6 @@ export class Meeting extends BaseTable {
   @Column({ name: 'date', comment: '약속시간', type: 'timestamp' })
   date: Date;
 
-  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.meeting)
+  @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.meeting, { onDelete: 'CASCADE' })
   userMeetingRelations: UserMeetingRelation[];
 }

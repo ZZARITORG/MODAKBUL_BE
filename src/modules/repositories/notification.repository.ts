@@ -1,15 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { FriendShip, FriendStatus } from 'src/common/db/entities/friendship.entity';
-import { DataSource, Repository } from 'typeorm';
-import { FriendReqDto } from '../friend/dtos/friend-req-dto';
+import { Injectable, Logger } from '@nestjs/common';
+import { Notification } from 'src/common/db/entities/notification.entitiy';
 import { User } from 'src/common/db/entities/user.entity';
-import { FriendBlockDto } from '../friend/dtos/friend-block-dto';
-import { FriendAcptDto } from '../friend/dtos/friend-acpt-dto';
-import { FriendInfoDto } from '../friend/dtos/friend-info-dto';
-import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
-import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
-import { GetNotificationDto } from '../notification/dtos/notification-list-dto';
+import { DataSource, Repository } from 'typeorm';
 import { NotificationInfoDto } from '../notification/dtos/notification-info-dto';
+import { GetNotificationDto } from '../notification/dtos/notification-list-dto';
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {

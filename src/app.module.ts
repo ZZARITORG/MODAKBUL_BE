@@ -35,7 +35,7 @@ import { AuthGuard } from './common/gurad/auth.guard';
           password: configService.get<string>('DB_PASSWORD'),
           port: configService.get<number>('DB_PORT'),
           entities: [...indexEntities],
-          timezone: '+09:00',
+          timezone: 'Asia/Seoul',
           synchronize: synchronize,
           logging: env === 'local' ? true : false,
         };
