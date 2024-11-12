@@ -4,6 +4,7 @@ import { CreateMeetingReqDto } from './dtos/create-meeting-req-dto';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ChangeStatusMeetingReqDto } from './dtos/change-status-meeting-req-dto';
+import { CreateMeetingGroupReqDto } from './dtos/create-meeting-group-req-dto';
 
 @Controller('meeting')
 export class MeetingController {
@@ -31,11 +32,18 @@ export class MeetingController {
     return this.meetingService.getOneMeeting(meetingId);
   }
 
-  @Post()
+  @Post('friendId')
   async createMeeting(@Body() createMeetingDto: CreateMeetingReqDto, @CurrentUser() userId: string): Promise<Meeting> {
     return this.meetingService.createMeeting(createMeetingDto, userId);
   }
 
+  @Post('groupId')
+  async createMeetingGroup(
+    @Body() createMeetingGroupDto: CreateMeetingGroupReqDto,
+    @CurrentUser() userId: string,
+  ): Promise<Meeting> {
+    return this.meetingService.createMeetingGroup(createMeetingGroupDto, userId);
+  }
   @Post('accept')
   async acceptMeeting(
     @Body() acceptMeetingReqDto: ChangeStatusMeetingReqDto,

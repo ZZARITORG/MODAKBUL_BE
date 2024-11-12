@@ -16,6 +16,8 @@ import { AwsModule } from './modules/aws/aws.module';
 import { indexEntities } from './common/db/index.entities';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthGuard } from './common/gurad/auth.guard';
+import { FrequentFriendModule } from './modules/frequent-friend/frequent-friend.module';
+import { FrequentGroupModule } from './modules/frequent-group/frequent-group.module';
 
 //TODO 한국시간으로 저장
 @Module({
