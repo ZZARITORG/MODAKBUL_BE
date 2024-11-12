@@ -1,27 +1,27 @@
 import { Module, ValidationPipe } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { LoggingInterceptor } from './common/interceptors/logging-interceptor';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { indexEntities } from './common/db/index.entities';
 import { CustomExceptionFilter } from './common/filters/exception-filter';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthGuard } from './common/gurad/auth.guard';
+import { LoggingInterceptor } from './common/interceptors/logging-interceptor';
 import { AuthModule } from './modules/auth/auth.module';
-import { MeetingModule } from './modules/meeting/meeting.module';
-import { NotificationModule } from './modules/notification/notification.module';
+import { AwsModule } from './modules/aws/aws.module';
 import { FriendModule } from './modules/friend/friend.module';
 import { GroupModule } from './modules/group/group.module';
+import { MeetingModule } from './modules/meeting/meeting.module';
+import { NotificationModule } from './modules/notification/notification.module';
 import { UserModule } from './modules/user/user.module';
-import { AwsModule } from './modules/aws/aws.module';
-import { indexEntities } from './common/db/index.entities';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthGuard } from './common/gurad/auth.guard';
-import { FrequentFriendModule } from './modules/frequent-friend/frequent-friend.module';
-import { FrequentGroupModule } from './modules/frequent-group/frequent-group.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 //TODO 한국시간으로 저장
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

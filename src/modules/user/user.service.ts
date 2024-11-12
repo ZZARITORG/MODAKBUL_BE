@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Like } from 'typeorm';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { UserSearchDto } from './dtos/search-user-dto';
-import { User } from 'src/common/db/entities/user.entity';
-import { Like } from 'typeorm';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
+import { UpdateUserDto } from './dtos/update-user-dto';
 
 @Injectable()
 export class UserService {
@@ -28,5 +28,13 @@ export class UserService {
       name: user.name,
       profileUrl: user.profileUrl,
     }));
+  }
+
+  async getUsers(userId: string) {
+    return await this.userRepo.findUserById(userId);
+  }
+
+  async updateUser(userId: string, updateUserDto: UpdateUserDto) {
+    return await this.userRepo.update(userId, updateUserDto);
   }
 }
