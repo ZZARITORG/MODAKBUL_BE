@@ -73,16 +73,7 @@ export class GroupRepository extends Repository<Group> {
     return this.createQueryBuilder('group')
       .leftJoinAndSelect('group.members', 'groupMember')
       .leftJoinAndSelect('groupMember.user', 'user')
-      .select([
-        'group.id',
-        'group.createdAt',
-        'group.name',
-        'groupMember.id',
-        'user.id',
-        'user.userId',
-        'user.name',
-        'user.profileUrl',
-      ])
+      .select(['group.id', 'group.name', 'groupMember.id', 'user.id', 'user.userId', 'user.name', 'user.profileUrl'])
       .where('group.owner = :targetId', { targetId })
       .orderBy('group.createdAt', 'DESC')
       .getMany();

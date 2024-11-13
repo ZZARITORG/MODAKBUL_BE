@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/common/db/entities/user.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, Repository, UpdateResult } from 'typeorm';
 import { SignUpReqDto } from '../auth/dtos/signup-req-dto';
 export const USER_REPO = 'USER_REPO';
 
@@ -10,7 +10,7 @@ export class UserRepository extends Repository<User> {
     super(User, dataSource.createEntityManager());
   }
 
-  async findUserById(id: string) {
+  async findUserById(id: string): Promise<User> {
     return this.createQueryBuilder().where('id = :id', { id }).getOne();
   }
   async findUsersByIds(ids: string[]) {
@@ -34,9 +34,5 @@ export class UserRepository extends Repository<User> {
     const result = await this.save(user);
 
     return result;
-  }
-
-  async deleteUser(targetId: string) {
-    return await this.delete({ id: targetId });
   }
 }
