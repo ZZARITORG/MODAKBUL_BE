@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Like } from 'typeorm';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { UserSearchDto } from './dtos/search-user-dto';
-import { User } from 'src/common/db/entities/user.entity';
-import { Like } from 'typeorm';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
 
 @Injectable()
