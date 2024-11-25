@@ -6,10 +6,14 @@ import { GetUserResDto } from './dtos/get-user-res-dto';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
+import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject(USER_REPO) readonly userRepo: UserRepository) {}
+  constructor(
+    @Inject(USER_REPO) readonly userRepo: UserRepository,
+    @Inject(FRIEND_REPO) readonly friendRepo: FriendRepository,
+  ) {}
 
   async deleteUser(targetId: string): Promise<UpdateResultResDto> {
     const result = await this.userRepo.delete({ id: targetId });
@@ -44,8 +48,8 @@ export class UserService {
     return plainToInstance(UpdateResultResDto, result);
   }
 
-  async getUser(userId: string): Promise<GetUserResDto> {
-    const user = await this.userRepo.findUserById(userId);
+  async getUser(id: string, targetId: string): Promise<GetUserResDto> {
+    const user = await this.userRepo.findOne({ where: { id: targetId } });
     return plainToInstance(GetUserResDto, user);
   }
 }

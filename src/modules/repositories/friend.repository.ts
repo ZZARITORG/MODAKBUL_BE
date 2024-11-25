@@ -8,6 +8,7 @@ import { FriendAcptDto } from '../friend/dtos/friend-acpt-dto';
 import { FriendInfoDto } from '../friend/dtos/friend-info-dto';
 import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
+export const FRIEND_REPO = 'FRIEND_REPO';
 
 @Injectable()
 export class FriendRepository extends Repository<FriendShip> {

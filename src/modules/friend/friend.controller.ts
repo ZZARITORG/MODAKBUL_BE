@@ -7,13 +7,15 @@ import { FriendRejectDto } from './dtos/friend-reject-dto';
 import { GetFriendsDto } from './dtos/friend-list-dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FriendDeleteDto } from './dtos/friend-delete-dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @Controller('friend')
+@ApiTags('FRIEND')
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
   @ApiOperation({ summary: '친구 요청 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Post('friend-request')
   async friendReq(@Body() friendReqDto: FriendReqDto, @CurrentUser() sourceId: string) {
@@ -21,6 +23,7 @@ export class FriendController {
   }
 
   @ApiOperation({ summary: '친구 수락 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Post('friend-accept')
   async acceptFriendReq(@Body() friendAcptDto: FriendAcptDto) {
@@ -28,6 +31,7 @@ export class FriendController {
   }
 
   @ApiOperation({ summary: '친구 차단 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Post('friend-block')
   async blockFriend(@Body() friendBlockDto: FriendBlockDto) {
@@ -35,6 +39,7 @@ export class FriendController {
   }
 
   @ApiOperation({ summary: '친구 거절 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Post('friend-reject')
   async rejectFriend(@Body() friendRejectDto: FriendRejectDto) {
@@ -42,6 +47,7 @@ export class FriendController {
   }
 
   @ApiOperation({ summary: '친구 리스트 조회 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Post('friend-list')
   async getFriends(@Body() getFriendsDto: GetFriendsDto) {
@@ -49,6 +55,7 @@ export class FriendController {
   }
 
   @ApiOperation({ summary: '친구 삭제 API' })
+  @ApiBearerAuth()
   @ApiResponse({})
   @Delete()
   async removeFriendship(@Body() friendDeleteDto: FriendDeleteDto): Promise<void> {

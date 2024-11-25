@@ -26,11 +26,24 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v0');
-  const config = new DocumentBuilder().setTitle('MODAKBUL SERVICE DOCS').setVersion('1.0').build();
+
+  const config = new DocumentBuilder()
+    .setTitle('MODAKBUL SERVICE DOCS')
+    .setVersion('1.0')
+    .addBearerAuth({
+      type: 'http',
+      scheme: 'bearer',
+      name: 'JWT',
+      in: 'header',
+      description: '토큰 넣으세요',
+    })
+    .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
+      defaultModelsExpandDepth: -1,
     },
   });
   await app.listen(PORT);

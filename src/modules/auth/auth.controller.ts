@@ -3,13 +3,14 @@ import { AuthService } from './auth.service';
 import { RefreshTokenReqDto } from './dtos/refresh-token-req-dto';
 import { SignUpReqDto } from './dtos/signup-req-dto';
 
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { LoginReqDto } from './dtos/login-req-dto';
 import { RefreshTokenResDto } from './dtos/refresh-token-res-dto';
 import { TokenResDto } from './dtos/token-res-dto';
 
 @Controller('auth')
+@ApiTags('AUTH')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
