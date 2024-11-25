@@ -306,7 +306,6 @@ export class MeetingRepository extends Repository<Meeting> {
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-    console.log(oneHourAgo.toString());
     return await this.createQueryBuilder('meeting')
       .leftJoinAndSelect('meeting.userMeetingRelations', 'userMeetingAll')
       .leftJoinAndSelect('userMeetingAll.user', 'participants')

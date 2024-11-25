@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Like } from 'typeorm';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
@@ -7,6 +7,7 @@ import { UserSearchResponseDto } from './dtos/search-user-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
+import { GetOtherResDto } from './dtos/get-other-res-dto';
 
 @Injectable()
 export class UserService {
@@ -48,8 +49,41 @@ export class UserService {
     return plainToInstance(UpdateResultResDto, result);
   }
 
-  async getUser(id: string, targetId: string): Promise<GetUserResDto> {
-    const user = await this.userRepo.findOne({ where: { id: targetId } });
-    return plainToInstance(GetUserResDto, user);
+  async getUser(id: string, targetId: string) {
+    const user = await this.userRepo
+      .createQueryBuilder('user')
+      .leftJoinAndSelect(
+        'user.sentFriendships',
+        'sentFriendships',
+        'sentFriendships.source_id = :id OR sentFriendships.target_id = :id',
+        {
+          id,
+        },
+      )
+      .leftJoinAndSelect(
+        'user.receivedFriendships',
+        'receivedFriendships',
+        'receivedFriendships.source_id = :id OR receivedFriendships.target_id = :id',
+        {
+          id,
+        },
+      )
+      .where('user.id = :targetId', { targetId })
+      .getOne();
+
+    if (!user) {
+      throw new NotFoundException('사용자를 찾을 수 없습니다');
+    }
+
+    const status = user?.receivedFriendships[0]?.status ?? user?.sentFriendships[0]?.status ?? 'NONE';
+
+    return {
+      id: user.id,
+      userId: user.userId,
+      name: user.name,
+      phoneNo: user.phoneNo,
+      profileUrl: user.profileUrl,
+      status,
+    };
   }
 }

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserIdReqDto } from 'src/common/dto/user-id-req-dto';
 import { GetUserResDto } from './dtos/get-user-res-dto';
@@ -7,6 +7,7 @@ import { UserSearchResponseDto } from './dtos/search-user-res-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import { UserService } from './user.service';
+import { GetOtherResDto } from './dtos/get-other-res-dto';
 
 @Controller('user')
 @ApiTags('USER')
@@ -28,9 +29,10 @@ export class UserController {
   }
 
   @ApiOperation({ summary: '유저 정보 조회 API' })
+  @ApiResponse({ type: GetOtherResDto })
   @ApiBearerAuth()
   @Get(':id')
-  async getUser(@CurrentUser() id: string, @Param() param: UserIdReqDto): Promise<GetUserResDto> {
+  async getUser(@CurrentUser() id: string, @Param() param: UserIdReqDto) {
     return this.userService.getUser(id, param.id);
   }
 
@@ -38,7 +40,6 @@ export class UserController {
   @ApiBearerAuth()
   @Patch()
   async updateUser(@CurrentUser() userId: string, @Body() updateUserDto: UpdateUserDto): Promise<UpdateResultResDto> {
-    console.log(updateUserDto);
     return this.userService.updateUser(userId, updateUserDto);
   }
 

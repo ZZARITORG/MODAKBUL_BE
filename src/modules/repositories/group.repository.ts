@@ -88,7 +88,6 @@ export class GroupRepository extends Repository<Group> {
 
     //그룹멤버 업데이트
     if (updateGroupReqDto.friendIds.length > 0) {
-      console.log('진입');
       //기존 그룹멤버 삭제
       await this.createQueryBuilder()
         .delete()
@@ -100,15 +99,13 @@ export class GroupRepository extends Repository<Group> {
       if (members.length !== updateGroupReqDto.friendIds.length) {
         throw new NotFoundException('특정 사용자 정보가 없습니다.');
       }
-      console.log('멤버', members);
+
       const groupMembers = members.map((member) => {
         return this.groupMemberRepository.create({
           group: group,
           user: member,
         });
       });
-
-      console.log('그룹멤버', groupMembers);
 
       //그룹멤버 저장
       await this.groupMemberRepository.save(groupMembers);

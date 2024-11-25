@@ -23,7 +23,6 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     const authHeader = request.headers['authorization'];
-    console.log(authHeader);
 
     if (!authHeader) {
       throw new UnauthorizedException('헤더에 토큰이 없습니다.');

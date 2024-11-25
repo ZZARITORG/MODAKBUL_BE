@@ -24,7 +24,6 @@ export class MeetingController {
   @ApiResponse({ type: [HostMeetingResDto] })
   @Get('host')
   async getHostMeetingList(@CurrentUser() userId: string) {
-    console.log(userId);
     return this.meetingService.getHostMeetingList(userId);
   }
 
@@ -33,7 +32,6 @@ export class MeetingController {
   @ApiResponse({ type: [AcceptMeetingResDto] })
   @Get('accept')
   async getAcceptMeetingList(@CurrentUser() userId: string) {
-    console.log(userId);
     return this.meetingService.getAcceptMeetingList(userId);
   }
 

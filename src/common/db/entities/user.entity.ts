@@ -29,9 +29,11 @@ export class User extends BaseTable {
   @JoinColumn({ name: 'meeting_relation_id' })
   meetingRelation: UserMeetingRelation[];
 
-  @OneToMany(() => FriendShip, (friendship) => friendship.id)
-  @JoinColumn({ name: 'friendship_id' })
-  friendship: FriendShip[];
+  @OneToMany(() => FriendShip, (friendship) => friendship.source)
+  sentFriendships: FriendShip[];
+
+  @OneToMany(() => FriendShip, (friendship) => friendship.target)
+  receivedFriendships: FriendShip[];
 
   @OneToMany(() => Group, (group) => group.owner, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'group_id' })
