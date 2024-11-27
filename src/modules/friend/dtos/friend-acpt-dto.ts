@@ -2,11 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class FriendAcptDto {
-  @ApiProperty({ description: '요청보낸사람ID' })
-  @IsString()
-  @IsNotEmpty()
-  source_id: string;
-
   @ApiProperty({ description: '요청받은사람ID' })
   @IsString()
   @IsNotEmpty()

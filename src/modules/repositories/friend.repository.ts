@@ -8,6 +8,8 @@ import { FriendAcptDto } from '../friend/dtos/friend-acpt-dto';
 import { FriendInfoDto } from '../friend/dtos/friend-info-dto';
 import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
+import { FriendRejectDto } from '../friend/dtos/friend-reject-dto';
+export const FRIEND_REPO = 'FRIEND_REPO';
 
 @Injectable()
 export class FriendRepository extends Repository<FriendShip> {
@@ -77,10 +79,11 @@ export class FriendRepository extends Repository<FriendShip> {
       return await this.save(friendship);
     }
   }
-  async acptFriendship(friendAcptDto: FriendAcptDto): Promise<FriendShip | null> {
-    const sourceUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendAcptDto.source_id } });
+  async acptFriendship(friendAcptDto: FriendAcptDto, sourceId: string): Promise<FriendShip | null> {
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
+    // const sourceUser = await this.dataSource
+    //   .getRepository(User)
+    //   .findOne({ where: { userId: friendAcptDto.source_id } });
     const targetUser = await this.dataSource
       .getRepository(User)
       .findOne({ where: { userId: friendAcptDto.target_id } });
@@ -97,8 +100,9 @@ export class FriendRepository extends Repository<FriendShip> {
     return await this.save(friendship);
   }
 
-  async blockFriendship(friendBlockDto: FriendBlockDto): Promise<FriendShip | null> {
-    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.source_id } });
+  async blockFriendship(friendBlockDto: FriendBlockDto, sourceId: string): Promise<FriendShip | null> {
+    //const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.source_id } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.target_id } });
     const existingBlock = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.BLOCKED);
 
@@ -129,8 +133,9 @@ export class FriendRepository extends Repository<FriendShip> {
   }
 
   // 친구 삭제 메소드
-  async removeFriendship(friendDeleteDto: FriendDeleteDto): Promise<void> {
-    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.source_id } });
+  async removeFriendship(friendDeleteDto: FriendDeleteDto, sourceId: string): Promise<void> {
+    //const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.source_id } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.target_id } });
 
     const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.ACCEPTED);
@@ -143,8 +148,9 @@ export class FriendRepository extends Repository<FriendShip> {
     await this.remove(friendship); // 친구 관계 삭제
     this.logger.log(`친구 관계가 삭제되었습니다: ${JSON.stringify(friendship)}`);
   }
-  async getFriends(userId: string): Promise<FriendInfoDto[]> {
-    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { userId: userId } });
+  async getFriends(sourceId: string): Promise<FriendInfoDto[]> {
+    //const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { userId: userId } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     // 친구 목록을 조회하는 로직
     const friendships = await this.find({
       where: [
@@ -218,13 +224,14 @@ export class FriendRepository extends Repository<FriendShip> {
     return friends; // 친구 정보 반환
   }
 
-  async rejectFriendship(friendAcptDto: FriendAcptDto): Promise<void> {
-    const sourceUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendAcptDto.source_id } });
+  async rejectFriendship(friendRejectDto: FriendRejectDto, sourceId: string): Promise<void> {
+    // const sourceUser = await this.dataSource
+    //   .getRepository(User)
+    //   .findOne({ where: { userId: friendAcptDto.source_id } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource
       .getRepository(User)
-      .findOne({ where: { userId: friendAcptDto.target_id } });
+      .findOne({ where: { userId: friendRejectDto.target_id } });
     // 친구 요청 찾기
     const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.PENDING);
 

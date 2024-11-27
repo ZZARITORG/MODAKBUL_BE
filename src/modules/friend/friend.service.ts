@@ -5,7 +5,6 @@ import { FriendShip } from 'src/common/db/entities/friendship.entity';
 import { FriendAcptDto } from './dtos/friend-acpt-dto';
 import { FriendBlockDto } from './dtos/friend-block-dto';
 import { FriendRejectDto } from './dtos/friend-reject-dto';
-import { GetFriendsDto } from './dtos/friend-list-dto';
 import { FriendInfoDto } from './dtos/friend-info-dto';
 import { FriendDeleteDto } from './dtos/friend-delete-dto';
 
@@ -15,21 +14,21 @@ export class FriendService {
   async friendReq(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip> {
     return this.friendRepository.addFriendship(friendReqDto, sourceId);
   }
-  async friendAcpt(friendAcptDto: FriendAcptDto): Promise<FriendShip> {
-    return this.friendRepository.acptFriendship(friendAcptDto);
+  async friendAcpt(friendAcptDto: FriendAcptDto, sourceId: string): Promise<FriendShip> {
+    return this.friendRepository.acptFriendship(friendAcptDto, sourceId);
   }
-  async friendBlock(friendBlockDto: FriendBlockDto): Promise<FriendShip> {
-    return this.friendRepository.blockFriendship(friendBlockDto);
+  async friendBlock(friendBlockDto: FriendBlockDto, sourceId: string): Promise<FriendShip> {
+    return this.friendRepository.blockFriendship(friendBlockDto, sourceId);
   }
-  async friendReject(friendRejectDto: FriendRejectDto): Promise<void> {
-    return this.friendRepository.rejectFriendship(friendRejectDto);
+  async friendReject(friendRejectDto: FriendRejectDto, sourceId: string): Promise<void> {
+    return this.friendRepository.rejectFriendship(friendRejectDto, sourceId);
   }
-  async friendList(getFriendsDto: GetFriendsDto): Promise<FriendInfoDto[]> {
+  async friendList(sourceId: string): Promise<FriendInfoDto[]> {
     // Fetch the friend list using the user ID from the DTO
-    return this.friendRepository.getFriends(getFriendsDto.userId);
+    return this.friendRepository.getFriends(sourceId);
   }
-  async friendDelete(friendDeleteDto: FriendDeleteDto): Promise<void> {
-    return this.friendRepository.removeFriendship(friendDeleteDto); // DTO 전달
+  async friendDelete(friendDeleteDto: FriendDeleteDto, sourceId: string): Promise<void> {
+    return this.friendRepository.removeFriendship(friendDeleteDto, sourceId); // DTO 전달
   }
   async friendReqList(sourceId: string): Promise<FriendInfoDto[]> {
     return this.friendRepository.getFriendReq(sourceId);

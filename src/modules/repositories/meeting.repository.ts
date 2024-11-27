@@ -2,11 +2,11 @@ import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { DataSource, Repository } from 'typeorm';
 import { USER_REPO, UserRepository } from './user.repository';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
-import { CreateMeetingReqDto } from '../meeting/dtos/create-meeting-req-dto';
+import { CreateMeetingReqDto } from '../meeting/dtos/request/create-meeting-req-dto';
 import { MeetingStatus, UserMeetingRelation } from 'src/common/db/entities/user-meeting-relation.entity';
-import { ChangeStatusMeetingReqDto } from '../meeting/dtos/change-status-meeting-req-dto';
+import { ChangeStatusMeetingReqDto } from '../meeting/dtos/request/change-status-meeting-req-dto';
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
-import { CreateMeetingGroupReqDto } from '../meeting/dtos/create-meeting-group-req-dto';
+import { CreateMeetingGroupReqDto } from '../meeting/dtos/request/create-meeting-group-req-dto';
 import { Group } from 'src/common/db/entities/group.entity';
 import { FrequentFriend } from 'src/common/db/entities/frequent_friends.entity';
 import { FrequentGroup } from 'src/common/db/entities/frequent_groups.entity';
@@ -249,13 +249,7 @@ export class MeetingRepository extends Repository<Meeting> {
 
     userMeeting.status = MeetingStatus.ACCEPTED;
 
-    await this.userMeetingRepo.save(userMeeting);
-
-    return await this.createQueryBuilder('meeting')
-      .leftJoinAndSelect('meeting.userMeetingRelations', 'userMeeting')
-      .leftJoinAndSelect('userMeeting.user', 'user')
-      .where('meeting.id = :id', { id: acceptMeetingReqDto.meetingId })
-      .getOne();
+    return await this.userMeetingRepo.save(userMeeting);
   }
 
   // 약속 거절
@@ -274,13 +268,7 @@ export class MeetingRepository extends Repository<Meeting> {
 
     userMeeting.status = MeetingStatus.REJECTED;
 
-    await this.userMeetingRepo.save(userMeeting);
-
-    return await this.createQueryBuilder('meeting')
-      .leftJoinAndSelect('meeting.userMeetingRelations', 'userMeeting')
-      .leftJoinAndSelect('userMeeting.user', 'user')
-      .where('meeting.id = :id', { id: rejectMeetingReqDto.meetingId })
-      .getOne();
+    return await this.userMeetingRepo.save(userMeeting);
   }
 
   // 모든 예정된 약속 조회
@@ -318,7 +306,6 @@ export class MeetingRepository extends Repository<Meeting> {
     const oneHourAgo = new Date();
     oneHourAgo.setHours(oneHourAgo.getHours() - 1);
 
-    console.log(oneHourAgo.toString());
     return await this.createQueryBuilder('meeting')
       .leftJoinAndSelect('meeting.userMeetingRelations', 'userMeetingAll')
       .leftJoinAndSelect('userMeetingAll.user', 'participants')

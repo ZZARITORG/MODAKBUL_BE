@@ -5,10 +5,5 @@ export class FriendDeleteDto {
   @ApiProperty({ description: '요청보낸사람ID' })
   @IsNotEmpty()
   @IsString()
-  source_id: string;
-
-  @ApiProperty({ description: '요청보낸사람ID' })
-  @IsNotEmpty()
-  @IsString()
   target_id: string;
 }
