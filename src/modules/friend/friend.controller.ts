@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { FriendService } from './friend.service';
 import { FriendReqDto } from './dtos/friend-req-dto';
 import { FriendAcptDto } from './dtos/friend-acpt-dto';
@@ -31,6 +31,14 @@ export class FriendController {
   @Post('friend-list')
   async getFriends(@Body() getFriendsDto: GetFriendsDto) {
     return await this.friendService.friendList(getFriendsDto);
+  }
+  @Get('friend-req-list')
+  async getFriendReq(@CurrentUser() sourceId: string) {
+    return await this.friendService.friendReqList(sourceId);
+  }
+  @Get('friend-block-list')
+  async getFriendBlock(@CurrentUser() sourceId: string) {
+    return await this.friendService.friendBlockList(sourceId);
   }
   @Delete()
   async removeFriendship(@Body() friendDeleteDto: FriendDeleteDto): Promise<void> {

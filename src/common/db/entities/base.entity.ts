@@ -5,6 +5,7 @@ abstract class BaseTable {
     name: 'created_at',
     nullable: false,
     comment: '생성 시간',
+    type: 'timestamptz',
   })
   createdAt: Date;
 
@@ -13,6 +14,7 @@ abstract class BaseTable {
     nullable: true,
     default: () => 'NULL',
     comment: '업데이트 시간',
+    type: 'timestamptz',
   })
   updatedAt: Date;
 }

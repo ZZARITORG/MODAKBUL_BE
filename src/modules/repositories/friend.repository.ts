@@ -98,12 +98,8 @@ export class FriendRepository extends Repository<FriendShip> {
   }
 
   async blockFriendship(friendBlockDto: FriendBlockDto): Promise<FriendShip | null> {
-    const sourceUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendBlockDto.source_id } });
-    const targetUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendBlockDto.target_id } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.source_id } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.target_id } });
     const existingBlock = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.BLOCKED);
 
     if (existingBlock && existingBlock.status === FriendStatus.BLOCKED) {
@@ -134,12 +130,8 @@ export class FriendRepository extends Repository<FriendShip> {
 
   // 친구 삭제 메소드
   async removeFriendship(friendDeleteDto: FriendDeleteDto): Promise<void> {
-    const sourceUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendDeleteDto.source_id } });
-    const targetUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendDeleteDto.target_id } });
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.source_id } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.target_id } });
 
     const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.ACCEPTED);
 
@@ -175,6 +167,56 @@ export class FriendRepository extends Repository<FriendShip> {
 
     return friends; // 친구 정보 반환
   }
+  async getFriendReq(userId: string): Promise<FriendInfoDto[]> {
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: userId } });
+    this.logger.log(`이것이유저아이디: ${userId}`);
+    if (!targetUser) {
+      throw new NotFoundException('Target User not found');
+    }
+    // 친구 목록을 조회하는 로직
+    const friendships = await this.find({
+      where: { target: { id: targetUser.id }, status: FriendStatus.PENDING },
+
+      relations: ['source'], //source만 가져오기
+    });
+
+    // 친구 정보 리스트 생성
+    const friends = friendships.map((friendship) => {
+      return {
+        id: friendship.source.id,
+        userId: friendship.source.userId,
+        name: friendship.source.name,
+        profileUrl: friendship.source.profileUrl,
+      };
+    });
+
+    return friends; // 친구 정보 반환
+  }
+  async getFriendBlock(userId: string): Promise<FriendInfoDto[]> {
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: userId } });
+    this.logger.log(`이것이유저아이디: ${userId}`);
+    if (!sourceUser) {
+      throw new NotFoundException('Target User not found');
+    }
+    // 친구 목록을 조회하는 로직
+    const friendships = await this.find({
+      where: { source: { id: sourceUser.id }, status: FriendStatus.BLOCKED },
+
+      relations: ['target'], //target만 가져오기
+    });
+
+    // 친구 정보 리스트 생성
+    const friends = friendships.map((friendship) => {
+      return {
+        id: friendship.target.id,
+        userId: friendship.target.userId,
+        name: friendship.target.name,
+        profileUrl: friendship.target.profileUrl,
+      };
+    });
+
+    return friends; // 친구 정보 반환
+  }
 
   async rejectFriendship(friendAcptDto: FriendAcptDto): Promise<void> {
     const sourceUser = await this.dataSource
@@ -191,7 +233,12 @@ export class FriendRepository extends Repository<FriendShip> {
       throw new NotFoundException('Friend request not found or not pending');
     }
 
-    await this.remove(friendship); // 삭제
-    this.logger.log(`친구 요청을 삭제하였습니다: ${JSON.stringify(friendship)}`);
+    // 상태를 'REJECTED'로 변경
+    friendship.status = FriendStatus.REJECTED;
+
+    this.logger.log(`친구 요청을 거절하였습니다: ${JSON.stringify(friendship)}`);
+
+    // 변경된 상태 저장
+    await this.save(friendship);
   }
 }

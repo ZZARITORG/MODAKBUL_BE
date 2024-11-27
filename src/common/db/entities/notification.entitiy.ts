@@ -6,6 +6,7 @@ import { User } from './user.entity';
 export enum NotificationType {
   FRIEND_REQUEST = 'FRIEND_REQUEST',
   GROUP_INVITATION = 'GROUP_INVITATION',
+  MEETING_ALARM = 'MEETING_ALARM',
 }
 
 @Entity()
@@ -19,9 +20,11 @@ export class Notification extends BaseTable {
   // @ManyToOne(() => User, (user) => user.notifications, {
   //   onDelete: 'CASCADE',
   // })
+
   // user: User; // 요청을 받은 사람의 UUID를 저장
   @ManyToOne(() => User, { nullable: false })
   sourceUser: User; // 친구 요청을 보낸 사람의 UUID를 저장
+
   @ManyToOne(() => User, { nullable: false })
   targetUser: User; // 친구 요청을 보낸 사람의 UUID를 저장
 

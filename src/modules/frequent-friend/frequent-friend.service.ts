@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { FrequentFriend } from 'src/common/db/entities/frequent_friends.entity';
 import { Repository } from 'typeorm';
 

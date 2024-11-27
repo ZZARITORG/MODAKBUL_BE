@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { FrequentGroupService } from './frequent-group.service';
 
 @Controller('frequent-group')

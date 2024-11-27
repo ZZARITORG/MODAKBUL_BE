@@ -324,7 +324,7 @@ export class MeetingRepository extends Repository<Meeting> {
       .leftJoinAndSelect('userMeetingAll.user', 'participants')
       .where('meeting.hostId = :userId AND meeting.date >= :oneHourAgo', {
         userId,
-        oneHourAgo: oneHourAgo.toISOString(),
+        oneHourAgo,
       })
       .select([
         'meeting.id',
@@ -361,7 +361,7 @@ export class MeetingRepository extends Repository<Meeting> {
       .leftJoinAndSelect('userMeetingAll.user', 'participants')
       .where('"meeting"."host_id"::text != :userId AND "meeting"."date" >= :oneHourAgo', {
         userId,
-        oneHourAgo: oneHourAgo.toISOString(),
+        oneHourAgo,
       })
       .select([
         'meeting.id',

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { FrequentGroupService } from './frequent-group.service';
 import { FrequentGroupController } from './frequent-group.controller';
+import { FrequentGroupService } from './frequent-group.service';
 @Module({
   providers: [FrequentGroupService],
   controllers: [FrequentGroupController],

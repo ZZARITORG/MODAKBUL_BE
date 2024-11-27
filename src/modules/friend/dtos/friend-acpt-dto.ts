@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { FriendStatus } from 'src/common/db/entities/friendship.entity';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class FriendAcptDto {
   @ApiProperty({ description: '요청보낸사람ID' })

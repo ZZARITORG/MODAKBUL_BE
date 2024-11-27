@@ -44,6 +44,7 @@ export class MeetingController {
   ): Promise<Meeting> {
     return this.meetingService.createMeetingGroup(createMeetingGroupDto, userId);
   }
+
   @Post('accept')
   async acceptMeeting(
     @Body() acceptMeetingReqDto: ChangeStatusMeetingReqDto,

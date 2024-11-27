@@ -31,4 +31,10 @@ export class FriendService {
   async friendDelete(friendDeleteDto: FriendDeleteDto): Promise<void> {
     return this.friendRepository.removeFriendship(friendDeleteDto); // DTO 전달
   }
+  async friendReqList(sourceId: string): Promise<FriendInfoDto[]> {
+    return this.friendRepository.getFriendReq(sourceId);
+  }
+  async friendBlockList(sourceId: string): Promise<FriendInfoDto[]> {
+    return this.friendRepository.getFriendBlock(sourceId);
+  }
 }
