@@ -384,6 +384,7 @@ export class MeetingRepository extends Repository<Meeting> {
       .where('meeting.date >= :currentDate', { currentDate: new Date() })
       .select([
         'meeting.id',
+        'meeting.createdAt',
         'meeting.title',
         'meeting.content',
         'meeting.hostId',

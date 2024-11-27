@@ -127,6 +127,7 @@ export class MeetingService {
         address: meeting.address,
         detailAddress: meeting.detailAddress,
         date: meeting.date,
+        createdAt: meeting.createdAt,
         user: meeting.userMeetingRelations.map((userMeetingRelation) => {
           return {
             id: userMeetingRelation.user.id,

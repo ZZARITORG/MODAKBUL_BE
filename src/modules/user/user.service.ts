@@ -1,13 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Like } from 'typeorm';
+import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { GetUserResDto } from './dtos/get-user-res-dto';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
-import { UpdateUserDto } from './dtos/update-user-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
-import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
-import { GetOtherResDto } from './dtos/get-other-res-dto';
+import { UpdateUserDto } from './dtos/update-user-dto';
 
 @Injectable()
 export class UserService {

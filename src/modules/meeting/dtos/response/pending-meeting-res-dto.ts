@@ -46,6 +46,9 @@ export class PendingMeetingResDto {
   @ApiProperty({ description: '미팅 날짜 및 시간' })
   date: Date;
 
+  @ApiProperty({ description: '미팅 생성 시간' })
+  createdAt: Date;
+
   @ApiProperty({
     description: '참가자 관계 정보',
     type: [UserMeetingRelationDto],
