@@ -11,21 +11,26 @@ export class AuthService {
   ) {}
 
   async signUp(signUpReqDto: SignUpReqDto) {
-    //아이디 중복 체크
-    const existingAdmin = await this.userRepo.findUserByUserId(signUpReqDto.userId);
+    //중복 체크
+    const existingAdmin = await this.userRepo.findOneBy([
+      { phoneNo: signUpReqDto.phoneNo },
+      { userId: signUpReqDto.userId },
+    ]);
+
     if (existingAdmin) {
-      throw new BadRequestException('이미 가입된 아이디입니다.');
+      throw new BadRequestException('이미 가입된 아이디 혹은 휴대번호입니다.');
     }
+
     const user = await this.userRepo.saveUser(signUpReqDto);
 
     //인증 토큰 생성
-    const { accessToken, refreshToken } = await this.login(user.id);
+    const { accessToken, refreshToken } = await this.login(user.phoneNo);
 
     return { accessToken, refreshToken };
   }
 
-  async login(id: string) {
-    const user = await this.userRepo.findUserById(id);
+  async login(phoneNo: string) {
+    const user = await this.userRepo.findOne({ where: { phoneNo } });
 
     const payload = { id: user.id };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
@@ -48,5 +53,10 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException();
     }
+  }
+
+  async userIdDuplication(userId: string): Promise<boolean> {
+    const existingUser = await this.userRepo.findOne({ where: { userId } });
+    return existingUser ? false : true;
   }
 }

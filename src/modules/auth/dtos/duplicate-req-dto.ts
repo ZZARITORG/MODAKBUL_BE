@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class LoginReqDto {
-  @ApiProperty({ description: '휴대폰 번호' })
+export class DuplicateReqDto {
+  @ApiProperty({ description: '사용자 userID' })
   @IsString()
   @IsNotEmpty()
-  phoneNo: string;
+  userId: string;
 }

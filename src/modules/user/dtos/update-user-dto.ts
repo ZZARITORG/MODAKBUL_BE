@@ -21,9 +21,4 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profileUrl: string;
-
-  @ApiProperty({ description: 'fcmToken', required: false })
-  @IsOptional()
-  @IsString()
-  fcmToken: string;
 }

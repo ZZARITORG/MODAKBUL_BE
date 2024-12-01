@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from 'src/common/db/entities/user.entity';
-import { DataSource, In, Repository, UpdateResult } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { SignUpReqDto } from '../auth/dtos/signup-req-dto';
 export const USER_REPO = 'USER_REPO';
 

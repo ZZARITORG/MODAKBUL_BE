@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
 
 export enum StatusResDto {
   PENDING = 'PENDING',
@@ -24,9 +23,6 @@ export class GetOtherResDto {
 
   @ApiProperty({ description: '프로필 URL' })
   profileUrl: string;
-
-  @ApiProperty({ description: 'FCM TOKEN' })
-  fcmToken: string;
 
   @ApiProperty({ description: '친구 관계', enum: StatusResDto })
   status: StatusResDto;

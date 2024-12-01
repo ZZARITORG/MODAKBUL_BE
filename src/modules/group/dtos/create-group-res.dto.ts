@@ -30,7 +30,7 @@ export class UserDto {
   @ApiProperty({
     example: 'string',
   })
-  fcmToken: string;
+  fcmToken: string[];
 }
 
 // member.dto.ts

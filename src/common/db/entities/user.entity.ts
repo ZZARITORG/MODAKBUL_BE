@@ -10,20 +10,20 @@ export class User extends BaseTable {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'user_id', comment: '아이디' })
+  @Column({ name: 'user_id', comment: '아이디', unique: true })
   userId: string;
 
   @Column({ name: 'user_name', comment: '유저 이름' })
   name: string;
 
-  @Column({ name: 'phone_no', comment: '전화번호' })
+  @Column({ name: 'phone_no', comment: '전화번호', unique: true })
   phoneNo: string;
 
   @Column({ name: 'profile_url', comment: '프로필 URL', nullable: true })
   profileUrl: string;
 
-  @Column({ name: 'fcm_token', comment: 'FCM 토큰' })
-  fcmToken: string;
+  @Column('simple-array', { nullable: true })
+  fcmToken: string[];
 
   @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.user, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'meeting_relation_id' })

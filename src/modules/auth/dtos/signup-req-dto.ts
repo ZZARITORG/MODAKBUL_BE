@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 export class SignUpReqDto {
   @ApiProperty({ description: '아이디' })
@@ -23,7 +23,8 @@ export class SignUpReqDto {
   profileUrl: string;
 
   @ApiProperty({ description: 'FCM 토큰' })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsNotEmpty()
-  fcmToken: string;
+  fcmToken: string[];
 }

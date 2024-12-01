@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { Like } from 'typeorm';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
@@ -7,6 +7,8 @@ import { GetUserResDto } from './dtos/get-user-res-dto';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
+import * as _ from 'lodash';
+import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 
 @Injectable()
 export class UserService {
@@ -43,8 +45,30 @@ export class UserService {
     return plainToInstance(GetUserResDto, user);
   }
 
-  async updateUser(userId: string, updateUserDto: UpdateUserDto): Promise<UpdateResultResDto> {
-    const result = await this.userRepo.update(userId, updateUserDto);
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<UpdateResultResDto> {
+    if (updateUserDto.userId) {
+      const existingUserId = await this.userRepo.findOne({
+        where: { userId: updateUserDto.userId },
+      });
+
+      console.log(existingUserId);
+
+      if (!_.isEmpty(existingUserId)) {
+        throw new BadRequestException(`${updateUserDto.userId} 아이디가 이미 존재합니다.`);
+      }
+    }
+
+    if (updateUserDto.phoneNo) {
+      const existingPhoneNo = await this.userRepo.findOne({
+        where: { phoneNo: updateUserDto?.phoneNo },
+      });
+
+      if (!_.isEmpty(existingPhoneNo)) {
+        throw new BadRequestException(`${updateUserDto.phoneNo} 휴대폰 번호가 이미 존재합니다.`);
+      }
+    }
+
+    const result = await this.userRepo.update(id, updateUserDto);
     return plainToInstance(UpdateResultResDto, result);
   }
 
@@ -84,5 +108,23 @@ export class UserService {
       profileUrl: user.profileUrl,
       status,
     };
+  }
+
+  async updateFcm(updateFcmReqDto: UpdateFcmReqDto): Promise<void> {
+    const user = await this.userRepo.findOne({ where: { phoneNo: updateFcmReqDto.phoneNo } });
+
+    if (_.isEmpty(user)) {
+      throw new BadRequestException('해당 유저가 존재하지 않습니다.');
+    }
+
+    if (_.isEmpty(user.fcmToken)) {
+      user.fcmToken = [updateFcmReqDto.fcmToken];
+    } else {
+      user.fcmToken = [...user?.fcmToken, updateFcmReqDto.fcmToken];
+    }
+
+    await this.userRepo.save(user);
+
+    return;
   }
 }

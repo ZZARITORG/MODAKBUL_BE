@@ -8,6 +8,7 @@ import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import { UserService } from './user.service';
 import { GetOtherResDto } from './dtos/get-other-res-dto';
+import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 
 @Controller('user')
 @ApiTags('USER')
@@ -41,6 +42,13 @@ export class UserController {
   @Patch()
   async updateUser(@CurrentUser() userId: string, @Body() updateUserDto: UpdateUserDto): Promise<UpdateResultResDto> {
     return this.userService.updateUser(userId, updateUserDto);
+  }
+
+  @ApiOperation({ summary: 'FCM토큰 추가 API' })
+  @ApiBearerAuth()
+  @Patch('fcm')
+  async updateFcm(@Body() updateFcmReqDto: UpdateFcmReqDto): Promise<void> {
+    return this.userService.updateFcm(updateFcmReqDto);
   }
 
   @ApiOperation({ summary: '유저 삭제 API' })
