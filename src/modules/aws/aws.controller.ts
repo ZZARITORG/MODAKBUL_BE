@@ -21,7 +21,6 @@ export class AwsController {
   // }
 
   @ApiOperation({ summary: 'S3 업로드 URl 요청 API' })
-  @ApiBearerAuth()
   @ApiResponse({ description: 'PreSignedURL' })
   @Public()
   @Get('presigned/:fileName')
