@@ -2,7 +2,6 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AwsService } from './aws.service';
 import { FileNameReqDto } from 'src/common/dto/file-name-req-dto';
-import * as fs from 'fs';
 import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('aws')
@@ -24,6 +23,7 @@ export class AwsController {
   @ApiOperation({ summary: 'S3 업로드 URl 요청 API' })
   @ApiBearerAuth()
   @ApiResponse({ description: 'PreSignedURL' })
+  @Public()
   @Get('presigned/:fileName')
   async getPreSignedUrl(@Param() param: FileNameReqDto) {
     return await this.awsService.getSignedUrlS3(param.fileName);
