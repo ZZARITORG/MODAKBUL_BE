@@ -3,6 +3,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { FileNameReqDto } from 'src/common/dto/file-name-req-dto';
 import { AwsService } from './aws.service';
+const fs = require('fs');
 
 @Controller('aws')
 @ApiTags('AWS')
@@ -13,7 +14,7 @@ export class AwsController {
   // @Public()
   // uploadBasicProfile(): Promise<string> {
   //   const filePath = '/Users/baecheolhyein/Documents/default_profile.jpg';
-  //   const filename = 'profile/default';
+  //   const filename = 'profile/image/default';
   //   // 파일을 Buffer로 읽기
   //   const fileContent = fs.readFileSync(filePath);
 
