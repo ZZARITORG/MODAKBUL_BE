@@ -32,8 +32,10 @@ export class AuthService {
   async login(phoneNo: string) {
     const user = await this.userRepo.findOne({ where: { phoneNo } });
 
+    console.log(user);
+
     const payload = { id: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '5s' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d' });
 
     return {
@@ -58,5 +60,10 @@ export class AuthService {
   async userIdDuplication(userId: string): Promise<boolean> {
     const existingUser = await this.userRepo.findOne({ where: { userId } });
     return existingUser ? false : true;
+  }
+
+  async verifyPhoneNo(phoneNo: string): Promise<boolean> {
+    const existingUser = await this.userRepo.findOne({ where: { phoneNo } });
+    return existingUser ? true : false;
   }
 }

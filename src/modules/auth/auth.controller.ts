@@ -5,10 +5,11 @@ import { SignUpReqDto } from './dtos/signup-req-dto';
 
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
+import { DuplicateReqDto } from './dtos/duplicate-req-dto';
 import { LoginReqDto } from './dtos/login-req-dto';
 import { RefreshTokenResDto } from './dtos/refresh-token-res-dto';
 import { TokenResDto } from './dtos/token-res-dto';
-import { DuplicateReqDto } from './dtos/duplicate-req-dto';
+import { VerifyPhoneNoReqDto } from './dtos/verify-phone-no-req-dto';
 
 @Controller('auth')
 @ApiTags('AUTH')
@@ -37,6 +38,13 @@ export class AuthController {
   @Post('refresh-token')
   async getAccessToken(@Body() refreshTokenReqDto: RefreshTokenReqDto) {
     return await this.authService.refreshAccessToken(refreshTokenReqDto.refreshToken);
+  }
+
+  @ApiOperation({ summary: '휴대번호 중복확인 API', description: '휴대번호 존재하면 true, 사용가능하면 false' })
+  @Public()
+  @Post('phoneNo')
+  async verifyPhoneNo(@Body() body: VerifyPhoneNoReqDto): Promise<boolean> {
+    return await this.authService.verifyPhoneNo(body.phoneNo);
   }
 
   @ApiOperation({ summary: 'userId 중복확인 API', description: '이미 id 존재하면 false, 사용가능하면 true' })

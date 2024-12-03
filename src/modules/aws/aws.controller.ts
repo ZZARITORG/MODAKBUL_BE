@@ -1,8 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AwsService } from './aws.service';
-import { FileNameReqDto } from 'src/common/dto/file-name-req-dto';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
+import { FileNameReqDto } from 'src/common/dto/file-name-req-dto';
+import { AwsService } from './aws.service';
 
 @Controller('aws')
 @ApiTags('AWS')

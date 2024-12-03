@@ -1,16 +1,14 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { AppService } from './app.service';
-import { Public } from './common/decorators/public.decorator';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @ApiOperation({ summary: 'Health Check' })
-  @Public()
+  @ApiOperation({ summary: '[Health Check] 토큰 검증' })
   @Get('/health')
-  getHello(): string {
-    return this.appService.getHello();
+  getHello() {
+    return;
   }
 }
