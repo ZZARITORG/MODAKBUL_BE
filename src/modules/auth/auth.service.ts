@@ -32,10 +32,8 @@ export class AuthService {
   async login(phoneNo: string) {
     const user = await this.userRepo.findOne({ where: { phoneNo } });
 
-    console.log(user);
-
     const payload = { id: user.id };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '5s' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d' });
 
     return {
