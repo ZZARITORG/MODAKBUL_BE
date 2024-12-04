@@ -51,4 +51,7 @@ export class GetGroupListResDto {
     type: [MemberDto],
   })
   members: MemberDto[];
+
+  @ApiProperty({ description: '자주만난 횟수' })
+  count: number;
 }

@@ -7,6 +7,7 @@ import { FriendBlockDto } from './dtos/friend-block-dto';
 import { FriendRejectDto } from './dtos/friend-reject-dto';
 import { FriendInfoDto } from './dtos/friend-info-dto';
 import { FriendDeleteDto } from './dtos/friend-delete-dto';
+import { FriendListDto } from './dtos/friend-list-dto';
 
 @Injectable()
 export class FriendService {
@@ -23,7 +24,7 @@ export class FriendService {
   async friendReject(friendRejectDto: FriendRejectDto, sourceId: string): Promise<void> {
     return this.friendRepository.rejectFriendship(friendRejectDto, sourceId);
   }
-  async friendList(sourceId: string): Promise<FriendInfoDto[]> {
+  async friendList(sourceId: string): Promise<FriendListDto[]> {
     // Fetch the friend list using the user ID from the DTO
     return this.friendRepository.getFriends(sourceId);
   }

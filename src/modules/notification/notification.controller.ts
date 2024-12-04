@@ -1,5 +1,4 @@
-import { Body, Controller, Get } from '@nestjs/common';
-import { GetNotificationDto } from './dtos/notification-list-dto';
+import { Controller, Get } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
@@ -13,7 +12,7 @@ export class NotificationController {
   @ApiBearerAuth()
   @ApiResponse({})
   @Get('notification-list')
-  async getFriends(@Body() getNotificationDto: GetNotificationDto, @CurrentUser() sourceId: string) {
-    return await this.notificationService.notificationList(getNotificationDto, sourceId);
+  async getFriends(@CurrentUser() sourceId: string) {
+    return await this.notificationService.notificationList(sourceId);
   }
 }

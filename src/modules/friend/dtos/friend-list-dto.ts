@@ -1,9 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
 
-export class GetFriendsDto {
+export class FriendListDto {
   @ApiProperty({ description: '유저 ID' })
-  @IsString()
-  @IsNotEmpty()
   userId: string;
+
+  @ApiProperty({ description: '유저 이름' })
+  name: string;
+
+  @ApiProperty({ description: '프로필 URL' })
+  profileUrl: string;
+
+  @ApiProperty({ description: '자주만난 횟수' })
+  count: number;
 }

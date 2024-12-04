@@ -9,6 +9,7 @@ import { FriendInfoDto } from '../friend/dtos/friend-info-dto';
 import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
 import { FriendRejectDto } from '../friend/dtos/friend-reject-dto';
+import { FriendListDto } from '../friend/dtos/friend-list-dto';
 export const FRIEND_REPO = 'FRIEND_REPO';
 
 @Injectable()
@@ -37,7 +38,7 @@ export class FriendRepository extends Repository<FriendShip> {
   async addFriendship(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip | null> {
     this.logger.log(`우오오오오ㅗㅇ오: ${JSON.stringify(sourceId)}`);
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
-    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { userId: friendReqDto.target_id } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendReqDto.target_id } });
 
     this.logger.log(`Source User: ${JSON.stringify(sourceUser.id)}`);
     this.logger.log(`Target User: ${JSON.stringify(targetUser.id)}`);
@@ -81,12 +82,7 @@ export class FriendRepository extends Repository<FriendShip> {
   }
   async acptFriendship(friendAcptDto: FriendAcptDto, sourceId: string): Promise<FriendShip | null> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
-    // const sourceUser = await this.dataSource
-    //   .getRepository(User)
-    //   .findOne({ where: { userId: friendAcptDto.source_id } });
-    const targetUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendAcptDto.target_id } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendAcptDto.target_id } });
 
     const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.PENDING);
 
@@ -129,6 +125,7 @@ export class FriendRepository extends Repository<FriendShip> {
         { source: { id: sourceId }, target: { id: targetId }, status: status },
         { source: { id: targetId }, target: { id: sourceId }, status: status },
       ],
+      relations: ['source', 'target'],
     });
   }
 
@@ -148,7 +145,7 @@ export class FriendRepository extends Repository<FriendShip> {
     await this.remove(friendship); // 친구 관계 삭제
     this.logger.log(`친구 관계가 삭제되었습니다: ${JSON.stringify(friendship)}`);
   }
-  async getFriends(sourceId: string): Promise<FriendInfoDto[]> {
+  async getFriends(sourceId: string): Promise<FriendListDto[]> {
     //const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { userId: userId } });
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     // 친구 목록을 조회하는 로직
@@ -162,12 +159,15 @@ export class FriendRepository extends Repository<FriendShip> {
 
     // 친구 정보 리스트 생성
     const friends = friendships.map((friendship) => {
+      const isSource = friendship.source.id === sourceUser.id;
       const friend = friendship.source.id === sourceUser.id ? friendship.target : friendship.source;
       return {
         id: friend.id,
         userId: friend.userId,
         name: friend.name,
         profileUrl: friend.profileUrl,
+        count: isSource ? friendship.sourcecount : friendship.targetcount,
+        updateAt: friendship.updatedAt,
       };
     });
 
@@ -229,9 +229,7 @@ export class FriendRepository extends Repository<FriendShip> {
     //   .getRepository(User)
     //   .findOne({ where: { userId: friendAcptDto.source_id } });
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
-    const targetUser = await this.dataSource
-      .getRepository(User)
-      .findOne({ where: { userId: friendRejectDto.target_id } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendRejectDto.target_id } });
     // 친구 요청 찾기
     const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.PENDING);
 

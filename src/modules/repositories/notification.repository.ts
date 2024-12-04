@@ -4,7 +4,6 @@ import { Notification } from 'src/common/db/entities/notification.entitiy';
 import { User } from 'src/common/db/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { NotificationInfoDto } from '../notification/dtos/notification-info-dto';
-import { GetNotificationDto } from '../notification/dtos/notification-list-dto';
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {
@@ -16,7 +15,7 @@ export class NotificationRepository extends Repository<Notification> {
     this.meetingRepo = dataSource.getRepository(Meeting);
   }
 
-  async getNotification(getNotificationDto: GetNotificationDto, userId: string): Promise<NotificationInfoDto[]> {
+  async getNotification(userId: string): Promise<NotificationInfoDto[]> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: userId } });
 
     const notifications = await this.find({

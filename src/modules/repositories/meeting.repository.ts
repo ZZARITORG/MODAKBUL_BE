@@ -8,8 +8,7 @@ import { ChangeStatusMeetingReqDto } from '../meeting/dtos/request/change-status
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
 import { CreateMeetingGroupReqDto } from '../meeting/dtos/request/create-meeting-group-req-dto';
 import { Group } from 'src/common/db/entities/group.entity';
-import { FrequentFriend } from 'src/common/db/entities/frequent_friends.entity';
-import { FrequentGroup } from 'src/common/db/entities/frequent_groups.entity';
+import { FriendShip } from 'src/common/db/entities/friendship.entity';
 export const MEETING_REPO = 'MEETING_REPO';
 
 @Injectable()
@@ -47,10 +46,12 @@ export class MeetingRepository extends Repository<Meeting> {
       ...createMeetingReqDto,
       hostId: userId,
     });
+    this.logger.log(`req다: ${createMeetingReqDto.friendIds}`);
 
     const savedMeeting = await this.save(meeting);
 
     const host = await this.userRepo.findUserById(userId);
+    this.logger.log(`유저아이디다: ${host.id}`);
 
     const users = await this.userRepo.findUsersByIds(createMeetingReqDto.friendIds);
 
@@ -73,31 +74,41 @@ export class MeetingRepository extends Repository<Meeting> {
       await this.createNotification(
         host.id, // 호스트 ID (sourceUser)
         user.id, // 초대된 멤버 ID (targetUser)
-        NotificationType.GROUP_INVITATION,
+        NotificationType.MEETING_ALARM,
         savedMeeting.id,
       );
-      // 친구 관계가 있으면 count를 1 증가시키거나, 없으면 새로 추가
-      const existingFrequentFriend = await this.dataSource
-        .getRepository(FrequentFriend)
-        .createQueryBuilder('ff')
-        .where(
-          '(ff.source_id = :userId AND ff.target_id = :friendId) OR (ff.source_id = :friendId AND ff.target_id = :userId)',
-          { userId: host.id, friendId: user.id },
-        )
-        .getOne();
-
-      if (existingFrequentFriend) {
-        // 이미 기록이 있으면 count 증가
-        existingFrequentFriend.count += 1;
-        await this.dataSource.getRepository(FrequentFriend).save(existingFrequentFriend);
+    }
+    // FriendShip 카운트 업데이트 로직
+    for (const user of users) {
+      this.logger.log(`호스트아이디다: ${host.id}`);
+      this.logger.log(`타겟아이디다: ${user.id}`);
+      const friendShipRepository = this.dataSource.getRepository(FriendShip);
+      // const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: host.id } });
+      // const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: user.id } });
+      const friendShip = await friendShipRepository.findOne({
+        where: [
+          { source: { id: host.id }, target: { id: user.id } },
+          { source: { id: user.id }, target: { id: host.id } },
+        ],
+        relations: ['source', 'target'],
+      });
+      if (friendShip) {
+        this.logger.log(`아이디아이디아이디다: ${friendShip.source.id}`);
+        if (friendShip.source) {
+          // userId가 source인 경우 sourcecount 증가
+          if (friendShip.source.id === host.id) {
+            friendShip.sourcecount += 1;
+          }
+          // userId가 target인 경우 targetcount 증가
+          else if (friendShip.target.id === host.id) {
+            friendShip.targetcount += 1;
+          }
+          await friendShipRepository.save(friendShip); // FriendShip 엔티티 저장
+        } else {
+          this.logger.error('Friendship object has no source or target');
+        }
       } else {
-        // 기록이 없으면 새로운 FrequentFriend 추가
-        const newFrequentFriend = this.dataSource.getRepository(FrequentFriend).create({
-          source: host,
-          target: user,
-          count: 1,
-        });
-        await this.dataSource.getRepository(FrequentFriend).save(newFrequentFriend);
+        this.logger.error('Friendship not found');
       }
     }
 
@@ -154,45 +165,45 @@ export class MeetingRepository extends Repository<Meeting> {
     //   });
     // });
 
-    // FrequentGroup 생성 또는 업데이트
     for (const group of groups) {
-      const frequentGroupRepository = this.dataSource.getRepository(FrequentGroup);
-      let frequentGroup = await frequentGroupRepository.findOne({
-        where: { source: { id: userId }, group: { id: group.id } },
-      });
-
-      if (!frequentGroup) {
-        frequentGroup = frequentGroupRepository.create({
-          source: host,
-          group: group,
-          count: 1,
-        });
-        await frequentGroupRepository.save(frequentGroup);
-      } else {
-        frequentGroup.count += 1;
-        await frequentGroupRepository.save(frequentGroup);
+      const groupRepository = this.dataSource.getRepository(Group); // Group 레포지토리
+      const existingGroup = await groupRepository.findOne({ where: { id: group.id } });
+      if (existingGroup) {
+        existingGroup.count += 1; // 그룹 count 증가
+        await groupRepository.save(existingGroup);
+        this.logger.log(`Group 업데이트됨: 그룹(${group.id})`);
       }
-
-      this.logger.log(`FrequentGroup 업데이트됨: 사용자(${host.id})와 그룹(${group.id})`);
     }
 
     // FrequentFriend 생성 또는 업데이트
     for (const user of uniqueUsers) {
-      const frequentFriendRepository = this.dataSource.getRepository(FrequentFriend);
-      let frequentFriend = await frequentFriendRepository.findOne({
-        where: { source: { id: userId }, target: { id: user.id } },
+      const friendShipRepository = this.dataSource.getRepository(FriendShip);
+      const friendShip = await friendShipRepository.findOne({
+        where: [
+          { source: { id: host.id }, target: { id: user.id } },
+          { source: { id: user.id }, target: { id: host.id } },
+        ],
+        relations: ['source', 'target'],
       });
-
-      if (!frequentFriend) {
-        frequentFriend = frequentFriendRepository.create({
-          source: { id: userId },
-          target: user,
-          count: 1,
-        });
-        await frequentFriendRepository.save(frequentFriend);
+      this.logger.log(`유저아이디다: ${userId}`);
+      this.logger.log(`타겟아이디다: ${user.id}`);
+      if (friendShip) {
+        this.logger.log(`아이디아이디아이디다: ${friendShip.source.id}`);
+        if (friendShip.source) {
+          // userId가 source인 경우 sourcecount 증가
+          if (friendShip.source.id === host.id) {
+            friendShip.sourcecount += 1;
+          }
+          // userId가 target인 경우 targetcount 증가
+          else if (friendShip.target.id === host.id) {
+            friendShip.targetcount += 1;
+          }
+          await friendShipRepository.save(friendShip); // FriendShip 엔티티 저장
+        } else {
+          this.logger.error('Friendship object has no source or target');
+        }
       } else {
-        frequentFriend.count += 1;
-        await frequentFriendRepository.save(frequentFriend);
+        this.logger.error('Friendship not found');
       }
 
       this.logger.log(`FrequentFriend 업데이트됨: 사용자(${userId})와 대상(${user.id})`);

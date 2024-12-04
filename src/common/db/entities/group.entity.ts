@@ -21,6 +21,8 @@ export class Group extends BaseTable {
   })
   @JoinColumn({ name: 'member_id' })
   members: GroupMember[];
+  @Column({ type: 'int', default: 0 })
+  count: number; // 자주 만난 횟수
 }
 
 @Entity('group_member')

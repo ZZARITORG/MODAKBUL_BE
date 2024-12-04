@@ -32,4 +32,8 @@ export class FriendShip extends BaseTable {
     default: FriendStatus.PENDING,
   })
   status: FriendStatus;
+  @Column({ type: 'int', default: 0 })
+  sourcecount: number;
+  @Column({ type: 'int', default: 0 })
+  targetcount: number;
 }
