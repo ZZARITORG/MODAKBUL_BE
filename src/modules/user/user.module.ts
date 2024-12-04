@@ -20,5 +20,6 @@ import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository
       useClass: FriendRepository,
     },
   ],
+  exports: [UserService],
 })
 export class UserModule {}

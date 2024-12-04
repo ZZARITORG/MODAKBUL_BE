@@ -19,11 +19,17 @@ export class User extends BaseTable {
   @Column({ name: 'phone_no', comment: '전화번호', unique: true })
   phoneNo: string;
 
-  @Column({ name: 'profile_url', comment: '프로필 URL', nullable: true })
+  @Column({ name: 'profile_url', comment: '프로필 URL' })
   profileUrl: string;
 
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { comment: 'fcm토큰' })
   fcmToken: string[];
+
+  @Column({ name: 'is_friend_alarm', comment: '친구 알림 수신여부', default: true })
+  isFriendAlarm: boolean;
+
+  @Column({ name: 'is_meeting_alarm', comment: '모닥불 알림 수신여부', default: true })
+  isMeetingAlarm: boolean;
 
   @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.user, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'meeting_relation_id' })

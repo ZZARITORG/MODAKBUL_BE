@@ -42,6 +42,16 @@ export class AuthService {
     };
   }
 
+  async logout(userId: string, fcmToken: string) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+
+    const newToken = user.fcmToken.filter((item) => item !== fcmToken);
+
+    user.fcmToken = newToken;
+
+    await this.userRepo.save(user);
+  }
+
   async refreshAccessToken(refreshToken: string) {
     try {
       const decoded = this.jwtService.verify(refreshToken);

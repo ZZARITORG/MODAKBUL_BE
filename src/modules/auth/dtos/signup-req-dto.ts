@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { HyphenTel } from 'src/common/decorators/trans-phone-no.decorator';
 
 export class SignUpReqDto {
   @ApiProperty({ description: '아이디' })
@@ -13,6 +14,7 @@ export class SignUpReqDto {
   name: string;
 
   @ApiProperty({ description: '전화번호' })
+  @HyphenTel()
   @IsString()
   @IsNotEmpty()
   phoneNo: string;

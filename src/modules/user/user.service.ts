@@ -9,6 +9,7 @@ import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import * as _ from 'lodash';
 import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
+import { LoginReqDto } from '../auth/dtos/login-req-dto';
 
 @Injectable()
 export class UserService {
@@ -110,17 +111,15 @@ export class UserService {
     };
   }
 
-  async updateFcm(updateFcmReqDto: UpdateFcmReqDto): Promise<void> {
+  async updateFcm(updateFcmReqDto: UpdateFcmReqDto | LoginReqDto): Promise<void> {
     const user = await this.userRepo.findOne({ where: { phoneNo: updateFcmReqDto.phoneNo } });
 
     if (_.isEmpty(user)) {
       throw new BadRequestException('해당 유저가 존재하지 않습니다.');
     }
 
-    if (_.isEmpty(user.fcmToken)) {
-      user.fcmToken = [updateFcmReqDto.fcmToken];
-    } else {
-      user.fcmToken = [...user?.fcmToken, updateFcmReqDto.fcmToken];
+    if (!user.fcmToken.includes(updateFcmReqDto.fcmToken)) {
+      user.fcmToken.push(updateFcmReqDto.fcmToken);
     }
 
     await this.userRepo.save(user);

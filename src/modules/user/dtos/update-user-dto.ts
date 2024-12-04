@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiProperty({ description: '유저 ID', required: false })
@@ -21,4 +21,14 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   profileUrl: string;
+
+  @ApiProperty({ description: '친구알람 수신 여부', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isFriendAlarm: boolean;
+
+  @ApiProperty({ description: '미팅알람 수신 여부', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isMeetingAlarm: boolean;
 }
