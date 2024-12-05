@@ -12,4 +12,7 @@ export class FriendListDto {
 
   @ApiProperty({ description: '자주만난 횟수' })
   count: number;
+
+  @ApiProperty({ description: '업데이트된 시간' })
+  updatedAt: Date;
 }

@@ -167,7 +167,7 @@ export class FriendRepository extends Repository<FriendShip> {
         name: friend.name,
         profileUrl: friend.profileUrl,
         count: isSource ? friendship.sourcecount : friendship.targetcount,
-        updateAt: friendship.updatedAt,
+        updatedAt: friendship.updatedAt,
       };
     });
 

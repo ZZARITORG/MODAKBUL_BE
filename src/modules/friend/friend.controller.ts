@@ -48,7 +48,7 @@ export class FriendController {
   @ApiOperation({ summary: '친구 리스트 조회 API' })
   @ApiBearerAuth()
   @ApiResponse({})
-  @Post('friend-list')
+  @Get('friend-list')
   async getFriends(@CurrentUser() sourceId: string) {
     return await this.friendService.friendList(sourceId);
   }
