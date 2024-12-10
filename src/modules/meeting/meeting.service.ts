@@ -4,17 +4,38 @@ import { CreateMeetingReqDto } from './dtos/request/create-meeting-req-dto';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
 import { ChangeStatusMeetingReqDto } from './dtos/request/change-status-meeting-req-dto';
 import { CreateMeetingGroupReqDto } from './dtos/request/create-meeting-group-req-dto';
+import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
+import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
+import { FriendStatus } from 'src/common/db/entities/friendship.entity';
 
 @Injectable()
 export class MeetingService {
-  constructor(@Inject(MEETING_REPO) private readonly meetingRepo: MeetingRepository) {}
+  constructor(
+    @Inject(MEETING_REPO) private readonly meetingRepo: MeetingRepository,
+    @Inject(GROUP_REPO) private readonly groupRepo: GroupRepository,
+    @Inject(FRIEND_REPO) private readonly friendShipRepo: FriendRepository,
+  ) {}
 
   async createMeeting(createMeetingReqDto: CreateMeetingReqDto, userId: string): Promise<Meeting> {
     return await this.meetingRepo.createMeeting(createMeetingReqDto, userId);
     // TODO 알림보내기
   }
-  async createMeetingGroup(createMeetingGroupDto: CreateMeetingGroupReqDto, userId: string): Promise<Meeting> {
-    return await this.meetingRepo.createMeetingGroup(createMeetingGroupDto, userId);
+  async createMeetingGroup(createMeetingGroupDto: CreateMeetingGroupReqDto, userId: string) {
+    const group = await this.groupRepo.findOne({
+      where: { id: createMeetingGroupDto.groupId },
+      relations: ['members', 'members.user'],
+    });
+
+    //그룹 생성
+    await this.meetingRepo.createMeetingByGroupId(userId, group, createMeetingGroupDto);
+
+    //그룹 count 증가
+    group.count++;
+    const savedGroup = await this.groupRepo.save(group);
+
+    //친구 count 증가
+    await this.friendShipRepo.countUp(userId, savedGroup);
+
     // TODO 알림보내기
   }
   async acceptMeeting(acceptMeetingReqDto: ChangeStatusMeetingReqDto, userId: string) {
@@ -37,6 +58,9 @@ export class MeetingService {
         address: meeting.meeting.address,
         detailAddress: meeting.meeting.detailAddress,
         date: meeting.meeting.date,
+        groupName: meeting.meeting.groupName,
+        lat: meeting.meeting.lat,
+        lng: meeting.meeting.lng,
       },
     };
   }
@@ -61,6 +85,9 @@ export class MeetingService {
         address: meeting.meeting.address,
         detailAddress: meeting.meeting.detailAddress,
         date: meeting.meeting.date,
+        groupName: meeting.meeting.groupName,
+        lat: meeting.meeting.lat,
+        lng: meeting.meeting.lng,
       },
     };
   }
@@ -77,6 +104,9 @@ export class MeetingService {
         address: meeting.address,
         detailAddress: meeting.detailAddress,
         date: meeting.date,
+        groupName: meeting.groupName,
+        lat: meeting.lat,
+        lng: meeting.lng,
         user: meeting.userMeetingRelations.map((userMeetingRelation) => {
           return {
             id: userMeetingRelation.user.id,
@@ -102,6 +132,9 @@ export class MeetingService {
         address: meeting.address,
         detailAddress: meeting.detailAddress,
         date: meeting.date,
+        groupName: meeting.groupName,
+        lat: meeting.lat,
+        lng: meeting.lng,
         user: meeting.userMeetingRelations.map((userMeetingRelation) => {
           return {
             id: userMeetingRelation.user.id,
@@ -128,6 +161,9 @@ export class MeetingService {
         detailAddress: meeting.detailAddress,
         date: meeting.date,
         createdAt: meeting.createdAt,
+        groupName: meeting.groupName,
+        lat: meeting.lat,
+        lng: meeting.lng,
         user: meeting.userMeetingRelations.map((userMeetingRelation) => {
           return {
             id: userMeetingRelation.user.id,
@@ -141,8 +177,10 @@ export class MeetingService {
     });
   }
 
-  async getOneMeeting(meetingId: string) {
+  async getOneMeeting(meetingId: string, userId: string) {
     const meeting = await this.meetingRepo.getOneMeeting(meetingId);
+
+    console.log(meeting);
     return {
       id: meeting.id,
       title: meeting.title,
@@ -152,15 +190,29 @@ export class MeetingService {
       address: meeting.address,
       detailAddress: meeting.detailAddress,
       date: meeting.date,
-      user: meeting.userMeetingRelations.map((userMeetingRelation) => {
-        return {
-          id: userMeetingRelation.user.id,
-          status: userMeetingRelation.status,
-          userId: userMeetingRelation.user.userId,
-          name: userMeetingRelation.user.name,
-          profileUrl: userMeetingRelation.user.profileUrl,
-        };
-      }),
+      groupName: meeting.groupName,
+      lat: meeting.lat,
+      lng: meeting.lng,
+      user: await Promise.all(
+        meeting.userMeetingRelations.map(async (userMeetingRelation) => {
+          const friendShip = await this.friendShipRepo.findBlocked(
+            userId,
+            userMeetingRelation.user.id,
+            FriendStatus.BLOCKED,
+          );
+
+          const isBlocked = friendShip ? true : false;
+
+          return {
+            id: userMeetingRelation.user.id,
+            status: userMeetingRelation.status,
+            userId: userMeetingRelation.user.userId,
+            name: userMeetingRelation.user.name,
+            profileUrl: userMeetingRelation.user.profileUrl,
+            isBlocked,
+          };
+        }),
+      ),
     };
   }
 }
