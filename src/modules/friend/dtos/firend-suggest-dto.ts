@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class FriendInfoDto {
+export class FriendSuggestionDto {
   @ApiProperty({ description: '유저 UUID' })
   id: string;
 
@@ -12,4 +12,7 @@ export class FriendInfoDto {
 
   @ApiProperty({ description: '프로필 URL' })
   profileUrl: string;
+
+  @ApiProperty({ description: '함께 아는 친구 수' })
+  mutualFriendCount: number;
 }

@@ -102,6 +102,18 @@ export class FriendRepository extends Repository<FriendShip> {
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.target_id } });
     const existingBlock = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.BLOCKED);
 
+    const existingFriendship = await this.createQueryBuilder('friendship')
+      .where(
+        `(friendship.source_id = :sourceId AND friendship.target_id = :targetId)
+       OR (friendship.source_id = :targetId AND friendship.target_id = :sourceId)`,
+        { sourceId: sourceUser.id, targetId: targetUser.id },
+      )
+      .getOne();
+
+    if (existingFriendship) {
+      await this.remove(existingFriendship); // 기존 친구 관계 삭제
+      this.logger.log(`기존 친구 관계를 삭제했습니다: ${existingFriendship.id}`);
+    }
     if (existingBlock && existingBlock.status === FriendStatus.BLOCKED) {
       this.logger.log(`이미 차단된 사용자입니다.`);
       return; // 이미 차단된 경우 처리하지 않음
@@ -117,6 +129,35 @@ export class FriendRepository extends Repository<FriendShip> {
     await this.save(blockRecord);
     this.logger.log(`사용자를 차단하였습니다: ${friendBlockDto.target_id}`);
     return blockRecord; // 차단된 기록 반환
+  }
+
+  async unblockFriendship(friendBlockDto: FriendBlockDto, sourceId: string): Promise<void> {
+    // 차단 해제할 사용자 정보 가져오기
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
+    const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendBlockDto.target_id } });
+
+    if (!sourceUser || !targetUser) {
+      throw new NotFoundException('Source or Target User not found');
+    }
+
+    // BLOCKED 상태의 친구 관계 찾기
+    const blockedFriendship = await this.findOne({
+      where: {
+        source: { id: sourceUser.id },
+        target: { id: targetUser.id },
+        status: FriendStatus.BLOCKED,
+      },
+      relations: ['source', 'target'],
+    });
+
+    if (!blockedFriendship) {
+      this.logger.log(`차단된 친구 관계가 존재하지 않습니다.`);
+      throw new NotFoundException('Blocked friendship not found');
+    }
+
+    // 차단 관계 삭제
+    await this.remove(blockedFriendship);
+    this.logger.log(`사용자의 차단을 해제했습니다: ${targetUser.id}`);
   }
 
   private async findFriendship(sourceId: string, targetId: string, status: FriendStatus): Promise<FriendShip | null> {

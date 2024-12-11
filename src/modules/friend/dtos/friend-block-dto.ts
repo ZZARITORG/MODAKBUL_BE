@@ -5,12 +5,4 @@ export class FriendBlockDto {
   @IsString()
   @IsNotEmpty()
   target_id: string;
-
-  //   @ApiProperty({
-  //     description: '친구 상태',
-  //     enum: FriendStatus,
-  //   })
-  //   @IsEnum(FriendStatus)
-  //   @IsNotEmpty()
-  //   status: FriendStatus;
 }

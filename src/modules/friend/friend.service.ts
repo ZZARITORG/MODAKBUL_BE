@@ -21,6 +21,9 @@ export class FriendService {
   async friendBlock(friendBlockDto: FriendBlockDto, sourceId: string): Promise<FriendShip> {
     return this.friendRepository.blockFriendship(friendBlockDto, sourceId);
   }
+  async friendUnblock(friendBlockDto: FriendBlockDto, sourceId: string): Promise<void> {
+    return this.friendRepository.unblockFriendship(friendBlockDto, sourceId);
+  }
   async friendReject(friendRejectDto: FriendRejectDto, sourceId: string): Promise<void> {
     return this.friendRepository.rejectFriendship(friendRejectDto, sourceId);
   }

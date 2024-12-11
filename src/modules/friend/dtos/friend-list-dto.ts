@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class FriendListDto {
+  @ApiProperty({ description: '유저 UUID' })
+  id: string;
+
   @ApiProperty({ description: '유저 ID' })
   userId: string;
 

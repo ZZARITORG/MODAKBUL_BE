@@ -36,7 +36,13 @@ export class FriendController {
   async blockFriend(@Body() friendBlockDto: FriendBlockDto, @CurrentUser() sourceId: string) {
     return await this.friendService.friendBlock(friendBlockDto, sourceId);
   }
-
+  @ApiOperation({ summary: '친구 차단 해제 API' })
+  @ApiBearerAuth()
+  @ApiResponse({})
+  @Post('friend-unblock')
+  async unblockFriend(@Body() friendBlockDto: FriendBlockDto, @CurrentUser() sourceId: string): Promise<void> {
+    return await this.friendService.friendUnblock(friendBlockDto, sourceId);
+  }
   @ApiOperation({ summary: '친구 거절 API' })
   @ApiBearerAuth()
   @ApiResponse({})
@@ -44,7 +50,12 @@ export class FriendController {
   async rejectFriend(@Body() friendRejectDto: FriendRejectDto, @CurrentUser() sourceId: string) {
     return await this.friendService.friendReject(friendRejectDto, sourceId);
   }
-
+  @ApiOperation({ summary: '알 수도 있는 친구 조회 API' })
+  @ApiBearerAuth()
+  @Get('suggested-friends')
+  async getSuggestedFriends(@CurrentUser() sourceId: string) {
+    return await this.friendService.friendList(sourceId);
+  }
   @ApiOperation({ summary: '친구 리스트 조회 API' })
   @ApiBearerAuth()
   @ApiResponse({})
