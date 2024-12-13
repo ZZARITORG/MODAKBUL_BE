@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class CreateMeetingGroupReqDto {
   @ApiProperty({ description: '제목' })
@@ -32,8 +32,18 @@ export class CreateMeetingGroupReqDto {
   @IsNotEmpty()
   date: Date;
 
-  @ApiProperty({ description: '모닥불 초대 그룹 ID' })
-  @IsArray()
+  @ApiProperty({ description: '위도' })
+  @IsNumber()
   @IsNotEmpty()
-  groupIds: string[];
+  lat: number;
+
+  @ApiProperty({ description: '경도' })
+  @IsNumber()
+  @IsNotEmpty()
+  lng: number;
+
+  @ApiProperty({ description: '모닥불 초대 그룹 ID' })
+  @IsUUID()
+  @IsNotEmpty()
+  groupId: string;
 }

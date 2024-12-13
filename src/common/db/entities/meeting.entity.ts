@@ -28,11 +28,14 @@ export class Meeting extends BaseTable {
   @Column({ name: 'date', comment: '약속시간', type: 'timestamp' })
   date: Date;
 
-  // @Column({ name: '위도', comment: '위도', type: 'decimal', precision: 10, scale: 8 })
-  // lat: number;
+  @Column({ name: 'lat', comment: '위도', type: 'decimal', precision: 10, scale: 8 })
+  lat: number;
 
-  // @Column({ name: '경도', comment: '경도', type: 'decimal', precision: 11, scale: 8 })
-  // lng: number;
+  @Column({ name: 'lng', comment: '경도', type: 'decimal', precision: 11, scale: 8 })
+  lng: number;
+
+  @Column({ name: 'group_name', comment: '그룹명 혹은 참여인원' })
+  groupName: string;
 
   @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.meeting, { onDelete: 'CASCADE' })
   userMeetingRelations: UserMeetingRelation[];

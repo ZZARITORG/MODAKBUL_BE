@@ -42,15 +42,19 @@ export class MeetingRepository extends Repository<Meeting> {
   }
   // 약속 생성
   async createMeeting(createMeetingReqDto: CreateMeetingReqDto, userId: string) {
+    const host = await this.userRepo.findUserById(userId);
+
+    const groupName = `${host.name}외 ${createMeetingReqDto.friendIds.length - 1}명`;
+
     const meeting = this.create({
       ...createMeetingReqDto,
       hostId: userId,
+      groupName,
     });
     this.logger.log(`req다: ${createMeetingReqDto.friendIds}`);
 
     const savedMeeting = await this.save(meeting);
 
-    const host = await this.userRepo.findUserById(userId);
     this.logger.log(`유저아이디다: ${host.id}`);
 
     const users = await this.userRepo.findUsersByIds(createMeetingReqDto.friendIds);
@@ -105,10 +109,10 @@ export class MeetingRepository extends Repository<Meeting> {
           }
           await friendShipRepository.save(friendShip); // FriendShip 엔티티 저장
         } else {
-          this.logger.error('Friendship object has no source or target');
+          throw new BadRequestException('친구가 아닌 사용자로 모닥불을 생성할 수 없슨니다.');
         }
       } else {
-        this.logger.error('Friendship not found');
+        throw new BadRequestException('');
       }
     }
 
@@ -122,6 +126,31 @@ export class MeetingRepository extends Repository<Meeting> {
       .where('meeting.id = :id', { id: savedMeeting.id })
       .getOne();
   }
+  async createMeetingByGroupId(userId: string, group: Group, createMeetingGroupReqDto: CreateMeetingGroupReqDto) {
+    const meeting = await this.save({
+      ...createMeetingGroupReqDto,
+      hostId: userId,
+      groupName: group.name,
+    });
+
+    await this.userMeetingRepo.save({
+      meeting,
+      user: { id: userId },
+      status: MeetingStatus.PENDING,
+    });
+
+    await Promise.all(
+      group.members.map(async (member) => {
+        const user = member.user;
+        return await this.userMeetingRepo.save({
+          meeting,
+          user,
+          status: MeetingStatus.PENDING,
+        });
+      }),
+    );
+  }
+
   async createMeetingGroup(createMeetingGroupReqDto: CreateMeetingGroupReqDto, userId: string) {
     // 회의 생성
     const meeting = this.create({
@@ -139,7 +168,7 @@ export class MeetingRepository extends Repository<Meeting> {
       .createQueryBuilder('group')
       .leftJoinAndSelect('group.members', 'groupMember')
       .leftJoinAndSelect('groupMember.user', 'user')
-      .where('group.id IN (:...groupIds)', { groupIds: createMeetingGroupReqDto.groupIds })
+      .where('group.id IN (:...groupIds)', { groupIds: createMeetingGroupReqDto.groupId })
       .getMany();
 
     // 그룹 멤버들로부터 사용자 리스트를 생성
@@ -302,6 +331,9 @@ export class MeetingRepository extends Repository<Meeting> {
         'meeting.address',
         'meeting.detailAddress',
         'meeting.date',
+        'meeting.lat',
+        'meeting.lng',
+        'meeting.groupName',
         'userMeetingAll.status',
         'participants.id',
         'participants.userId',
@@ -333,6 +365,9 @@ export class MeetingRepository extends Repository<Meeting> {
         'meeting.address',
         'meeting.detailAddress',
         'meeting.date',
+        'meeting.lat',
+        'meeting.lng',
+        'meeting.groupName',
         'userMeetingAll.status',
         'participants.id',
         'participants.userId',
@@ -370,6 +405,9 @@ export class MeetingRepository extends Repository<Meeting> {
         'meeting.address',
         'meeting.detailAddress',
         'meeting.date',
+        'meeting.lat',
+        'meeting.lng',
+        'meeting.groupName',
         'userMeetingAll.status',
         'participants.id',
         'participants.userId',
@@ -403,6 +441,9 @@ export class MeetingRepository extends Repository<Meeting> {
         'meeting.address',
         'meeting.detailAddress',
         'meeting.date',
+        'meeting.lat',
+        'meeting.lng',
+        'meeting.groupName',
         'userMeetingAll.status',
         'participants.id',
         'participants.userId',
@@ -426,6 +467,9 @@ export class MeetingRepository extends Repository<Meeting> {
         'meeting.hostId',
         'meeting.location',
         'meeting.address',
+        'meeting.lat',
+        'meeting.lng',
+        'meeting.groupName',
         'meeting.detailAddress',
         'meeting.date',
         'userMeetingAll.status',

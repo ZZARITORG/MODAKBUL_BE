@@ -54,7 +54,7 @@ export class FriendController {
   @ApiBearerAuth()
   @Get('suggested-friends')
   async getSuggestedFriends(@CurrentUser() sourceId: string) {
-    return await this.friendService.friendList(sourceId);
+    return await this.friendService.getSuggestedFriends(sourceId);
   }
   @ApiOperation({ summary: '친구 리스트 조회 API' })
   @ApiBearerAuth()

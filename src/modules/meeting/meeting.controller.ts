@@ -46,8 +46,8 @@ export class MeetingController {
   @ApiBearerAuth()
   @ApiResponse({ type: DetailMeetingResDto })
   @Get(':id')
-  async getOneMeeting(@Param() param: MeetingIdReqDto) {
-    return this.meetingService.getOneMeeting(param.id);
+  async getOneMeeting(@Param() param: MeetingIdReqDto, @CurrentUser() userId: string) {
+    return this.meetingService.getOneMeeting(param.id, userId);
   }
 
   @ApiOperation({ summary: 'USER ID로 미팅 생성 API' })
@@ -60,10 +60,7 @@ export class MeetingController {
   @ApiOperation({ summary: 'GROUP ID로 미팅 생성 API' })
   @ApiBearerAuth()
   @Post('groupId')
-  async createMeetingGroup(
-    @Body() createMeetingGroupDto: CreateMeetingGroupReqDto,
-    @CurrentUser() userId: string,
-  ): Promise<Meeting> {
+  async createMeetingGroup(@Body() createMeetingGroupDto: CreateMeetingGroupReqDto, @CurrentUser() userId: string) {
     return this.meetingService.createMeetingGroup(createMeetingGroupDto, userId);
   }
 

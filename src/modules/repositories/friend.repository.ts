@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { FriendShip, FriendStatus } from 'src/common/db/entities/friendship.entity';
 import { DataSource, Repository } from 'typeorm';
 import { FriendReqDto } from '../friend/dtos/friend-req-dto';
@@ -10,6 +10,8 @@ import { FriendDeleteDto } from '../friend/dtos/friend-delete-dto';
 import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
 import { FriendRejectDto } from '../friend/dtos/friend-reject-dto';
 import { FriendListDto } from '../friend/dtos/friend-list-dto';
+import { Group } from 'src/common/db/entities/group.entity';
+import { FriendSuggestionDto } from '../friend/dtos/firend-suggest-dto';
 export const FRIEND_REPO = 'FRIEND_REPO';
 
 @Injectable()
@@ -35,6 +37,7 @@ export class FriendRepository extends Repository<FriendShip> {
     await notificationRepository.save(notification); // 알림 저장
     this.logger.log(`알림이 생성되었습니다: ${JSON.stringify(notification)}`); // 로그에 알림 정보 기록
   }
+
   async addFriendship(friendReqDto: FriendReqDto, sourceId: string): Promise<FriendShip | null> {
     this.logger.log(`우오오오오ㅗㅇ오: ${JSON.stringify(sourceId)}`);
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
@@ -80,6 +83,94 @@ export class FriendRepository extends Repository<FriendShip> {
       return await this.save(friendship);
     }
   }
+  async getSuggestedFriends(userId: string): Promise<FriendSuggestionDto[]> {
+    const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: userId } });
+
+    if (!sourceUser) {
+      throw new NotFoundException('Source User not found');
+    }
+
+    // 사용자가 아는 친구 목록 조회
+    const friendships = await this.find({
+      where: [
+        { source: { id: sourceUser.id }, status: FriendStatus.ACCEPTED },
+        { target: { id: sourceUser.id }, status: FriendStatus.ACCEPTED },
+      ],
+      relations: ['source', 'target'],
+    });
+
+    // 친구 목록에서 각각의 친구의 친구 목록을 찾기
+    const suggestedFriends: FriendSuggestionDto[] = [];
+
+    for (const friendship of friendships) {
+      const friend = friendship.source.id === sourceUser.id ? friendship.target : friendship.source;
+
+      // 친구의 친구 목록 조회
+      const friendFriends = await this.find({
+        where: [
+          { source: { id: friend.id }, status: FriendStatus.ACCEPTED },
+          { target: { id: friend.id }, status: FriendStatus.ACCEPTED },
+        ],
+        relations: ['source', 'target'],
+      });
+
+      for (const friendFriendship of friendFriends) {
+        const friendOfFriend =
+          friendFriendship.source.id === friend.id ? friendFriendship.target : friendFriendship.source;
+
+        // 이미 친구인 경우는 제외
+        if (friendOfFriend.id === sourceUser.id || suggestedFriends.some((s) => s.id === friendOfFriend.id)) {
+          continue;
+        }
+
+        // 함께 아는 친구 수 계산
+        const mutualFriendCount = await this.getMutualFriendCount(sourceUser.id, friendOfFriend.id);
+
+        suggestedFriends.push({
+          id: friendOfFriend.id,
+          userId: friendOfFriend.userId,
+          name: friendOfFriend.name,
+          profileUrl: friendOfFriend.profileUrl,
+          mutualFriendCount,
+        });
+      }
+    }
+
+    return suggestedFriends;
+  }
+
+  // 친구의 친구 목록에서 함께 아는 친구 수를 계산하는 함수
+  async getMutualFriendCount(userId1: string, userId2: string): Promise<number> {
+    const friendshipsUser1 = await this.find({
+      where: [
+        { source: { id: userId1 }, status: FriendStatus.ACCEPTED },
+        { target: { id: userId1 }, status: FriendStatus.ACCEPTED },
+      ],
+      relations: ['source', 'target'],
+    });
+
+    const friendshipsUser2 = await this.find({
+      where: [
+        { source: { id: userId2 }, status: FriendStatus.ACCEPTED },
+        { target: { id: userId2 }, status: FriendStatus.ACCEPTED },
+      ],
+      relations: ['source', 'target'],
+    });
+
+    // userId1과 userId2가 공유하는 친구 수를 계산
+    const friendsUser1 = friendshipsUser1.map((friendship) =>
+      friendship.source.id === userId1 ? friendship.target.id : friendship.source.id,
+    );
+    const friendsUser2 = friendshipsUser2.map((friendship) =>
+      friendship.source.id === userId2 ? friendship.target.id : friendship.source.id,
+    );
+
+    // 두 친구 목록의 교집합 계산
+    const mutualFriends = friendsUser1.filter((friendId) => friendsUser2.includes(friendId));
+
+    return mutualFriends.length;
+  }
+
   async acptFriendship(friendAcptDto: FriendAcptDto, sourceId: string): Promise<FriendShip | null> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendAcptDto.target_id } });
@@ -118,6 +209,10 @@ export class FriendRepository extends Repository<FriendShip> {
       this.logger.log(`이미 차단된 사용자입니다.`);
       return; // 이미 차단된 경우 처리하지 않음
     }
+
+    // existingBlock.blockedUser = sourceId;
+    // existingBlock.status = FriendStatus.BLOCKED;
+    // return await this.save(existingBlock);
 
     // 차단 기록 생성
     const blockRecord = this.create({
@@ -160,12 +255,19 @@ export class FriendRepository extends Repository<FriendShip> {
     this.logger.log(`사용자의 차단을 해제했습니다: ${targetUser.id}`);
   }
 
-  private async findFriendship(sourceId: string, targetId: string, status: FriendStatus): Promise<FriendShip | null> {
+  async findFriendship(sourceId: string, targetId: string, status: FriendStatus): Promise<FriendShip | null> {
     return await this.findOne({
       where: [
         { source: { id: sourceId }, target: { id: targetId }, status: status },
         { source: { id: targetId }, target: { id: sourceId }, status: status },
       ],
+      relations: ['source', 'target'],
+    });
+  }
+
+  async findBlocked(sourceId: string, targetId: string, status: FriendStatus): Promise<FriendShip | null> {
+    return await this.findOne({
+      where: [{ source: { id: sourceId }, target: { id: targetId }, status: status }],
       relations: ['source', 'target'],
     });
   }
@@ -286,5 +388,37 @@ export class FriendRepository extends Repository<FriendShip> {
 
     // 변경된 상태 저장
     await this.save(friendship);
+  }
+
+  async countUp(hostId: string, group: Group) {
+    // FrequentFriend 생성 또는 업데이트
+
+    for (const member of group.members) {
+      const user = member.user;
+
+      const friendShip = await this.findOne({
+        where: [
+          { source: { id: hostId }, target: { id: user.id } },
+          { source: { id: user.id }, target: { id: hostId } },
+        ],
+        relations: ['source', 'target'],
+      });
+
+      if (friendShip) {
+        if (friendShip.source) {
+          // userId가 source인 경우 sourcecount 증가
+          if (friendShip.source.id === hostId) {
+            friendShip.sourcecount += 1;
+          }
+          // userId가 target인 경우 targetcount 증가
+          else if (friendShip.target.id === hostId) {
+            friendShip.targetcount += 1;
+          }
+          await this.save(friendShip); // FriendShip 엔티티 저장
+        }
+      } else {
+        throw new BadRequestException('그룹멤버중에 친구가 아닌 사용자가 존재합니다.');
+      }
+    }
   }
 }
