@@ -94,93 +94,149 @@ export class MeetingService {
 
   async getHostMeetingList(userId: string) {
     const meetings = await this.meetingRepo.getHostMeetings(userId);
-    return meetings.map((meeting) => {
-      return {
-        id: meeting.id,
-        title: meeting.title,
-        content: meeting.content,
-        hostId: meeting.hostId,
-        location: meeting.location,
-        address: meeting.address,
-        detailAddress: meeting.detailAddress,
-        date: meeting.date,
-        groupName: meeting.groupName,
-        lat: meeting.lat,
-        lng: meeting.lng,
-        user: meeting.userMeetingRelations.map((userMeetingRelation) => {
-          return {
-            id: userMeetingRelation.user.id,
-            status: userMeetingRelation.status,
-            userId: userMeetingRelation.user.userId,
-            name: userMeetingRelation.user.name,
-            profileUrl: userMeetingRelation.user.profileUrl,
-          };
-        }),
-      };
-    });
+    return await Promise.all(
+      meetings.map(async (meeting) => {
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          content: meeting.content,
+          hostId: meeting.hostId,
+          location: meeting.location,
+          address: meeting.address,
+          detailAddress: meeting.detailAddress,
+          date: meeting.date,
+          groupName: meeting.groupName,
+          lat: meeting.lat,
+          lng: meeting.lng,
+          user: await Promise.all(
+            meeting.userMeetingRelations.map(async (userMeetingRelation) => {
+              let friendShipStatus: string;
+              let isMainAgent;
+
+              const friendShip = await this.friendShipRepo.findFriendshipByIds(userId, userMeetingRelation.user.id);
+
+              if (!friendShip) {
+                friendShipStatus = 'NONE';
+                isMainAgent = 'NONE';
+              } else {
+                friendShipStatus = friendShip.status;
+                isMainAgent = userId == friendShip.source.id;
+              }
+
+              return {
+                id: userMeetingRelation.user.id,
+                status: userMeetingRelation.status,
+                userId: userMeetingRelation.user.userId,
+                name: userMeetingRelation.user.name,
+                profileUrl: userMeetingRelation.user.profileUrl,
+                friendShipStatus,
+                isMainAgent,
+              };
+            }),
+          ),
+        };
+      }),
+    );
   }
 
   async getAcceptMeetingList(userId: string) {
     const meetings = await this.meetingRepo.getAcceptMeetingList(userId);
-    return meetings.map((meeting) => {
-      return {
-        id: meeting.id,
-        title: meeting.title,
-        content: meeting.content,
-        hostId: meeting.hostId,
-        location: meeting.location,
-        address: meeting.address,
-        detailAddress: meeting.detailAddress,
-        date: meeting.date,
-        groupName: meeting.groupName,
-        lat: meeting.lat,
-        lng: meeting.lng,
-        user: meeting.userMeetingRelations.map((userMeetingRelation) => {
-          return {
-            id: userMeetingRelation.user.id,
-            status: userMeetingRelation.status,
-            userId: userMeetingRelation.user.userId,
-            name: userMeetingRelation.user.name,
-            profileUrl: userMeetingRelation.user.profileUrl,
-          };
-        }),
-      };
-    });
+    return await Promise.all(
+      meetings.map(async (meeting) => {
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          content: meeting.content,
+          hostId: meeting.hostId,
+          location: meeting.location,
+          address: meeting.address,
+          detailAddress: meeting.detailAddress,
+          date: meeting.date,
+          groupName: meeting.groupName,
+          lat: meeting.lat,
+          lng: meeting.lng,
+          user: await Promise.all(
+            meeting.userMeetingRelations.map(async (userMeetingRelation) => {
+              let friendShipStatus: string;
+              let isMainAgent;
+
+              const friendShip = await this.friendShipRepo.findFriendshipByIds(userId, userMeetingRelation.user.id);
+
+              if (!friendShip) {
+                friendShipStatus = 'NONE';
+                isMainAgent = 'NONE';
+              } else {
+                friendShipStatus = friendShip.status;
+                isMainAgent = userId == friendShip.source.id;
+              }
+
+              return {
+                id: userMeetingRelation.user.id,
+                status: userMeetingRelation.status,
+                userId: userMeetingRelation.user.userId,
+                name: userMeetingRelation.user.name,
+                profileUrl: userMeetingRelation.user.profileUrl,
+                friendShipStatus,
+                isMainAgent,
+              };
+            }),
+          ),
+        };
+      }),
+    );
   }
 
   async getPendingMeetingList(userId: string) {
     const meetings = await this.meetingRepo.getPendingMeetings(userId);
-    return meetings.map((meeting) => {
-      return {
-        id: meeting.id,
-        title: meeting.title,
-        content: meeting.content,
-        hostId: meeting.hostId,
-        location: meeting.location,
-        address: meeting.address,
-        detailAddress: meeting.detailAddress,
-        date: meeting.date,
-        createdAt: meeting.createdAt,
-        groupName: meeting.groupName,
-        lat: meeting.lat,
-        lng: meeting.lng,
-        user: meeting.userMeetingRelations.map((userMeetingRelation) => {
-          return {
-            id: userMeetingRelation.user.id,
-            status: userMeetingRelation.status,
-            userId: userMeetingRelation.user.userId,
-            name: userMeetingRelation.user.name,
-            profileUrl: userMeetingRelation.user.profileUrl,
-          };
-        }),
-      };
-    });
+    return await Promise.all(
+      meetings.map(async (meeting) => {
+        return {
+          id: meeting.id,
+          title: meeting.title,
+          content: meeting.content,
+          hostId: meeting.hostId,
+          location: meeting.location,
+          address: meeting.address,
+          detailAddress: meeting.detailAddress,
+          date: meeting.date,
+          createdAt: meeting.createdAt,
+          groupName: meeting.groupName,
+          lat: meeting.lat,
+          lng: meeting.lng,
+          user: await Promise.all(
+            meeting.userMeetingRelations.map(async (userMeetingRelation) => {
+              let friendShipStatus: string;
+              let isMainAgent;
+
+              const friendShip = await this.friendShipRepo.findFriendshipByIds(userId, userMeetingRelation.user.id);
+
+              if (!friendShip) {
+                friendShipStatus = 'NONE';
+                isMainAgent = 'NONE';
+              } else {
+                friendShipStatus = friendShip.status;
+                isMainAgent = userId == friendShip.source.id;
+              }
+
+              return {
+                id: userMeetingRelation.user.id,
+                status: userMeetingRelation.status,
+                userId: userMeetingRelation.user.userId,
+                name: userMeetingRelation.user.name,
+                profileUrl: userMeetingRelation.user.profileUrl,
+                friendShipStatus,
+                isMainAgent,
+              };
+            }),
+          ),
+        };
+      }),
+    );
   }
 
   async getOneMeeting(meetingId: string, userId: string) {
     const meeting = await this.meetingRepo.getOneMeeting(meetingId);
 
-    console.log(meeting);
     return {
       id: meeting.id,
       title: meeting.title,
@@ -195,13 +251,18 @@ export class MeetingService {
       lng: meeting.lng,
       user: await Promise.all(
         meeting.userMeetingRelations.map(async (userMeetingRelation) => {
-          const friendShip = await this.friendShipRepo.findBlocked(
-            userId,
-            userMeetingRelation.user.id,
-            FriendStatus.BLOCKED,
-          );
+          let friendShipStatus: string;
+          let isMainAgent;
 
-          const isBlocked = friendShip ? true : false;
+          const friendShip = await this.friendShipRepo.findFriendshipByIds(userId, userMeetingRelation.user.id);
+
+          if (!friendShip) {
+            friendShipStatus = 'NONE';
+            isMainAgent = 'NONE';
+          } else {
+            friendShipStatus = friendShip.status;
+            isMainAgent = userId == friendShip.source.id;
+          }
 
           return {
             id: userMeetingRelation.user.id,
@@ -209,7 +270,8 @@ export class MeetingService {
             userId: userMeetingRelation.user.userId,
             name: userMeetingRelation.user.name,
             profileUrl: userMeetingRelation.user.profileUrl,
-            isBlocked,
+            friendShipStatus,
+            isMainAgent,
           };
         }),
       ),

@@ -265,6 +265,16 @@ export class FriendRepository extends Repository<FriendShip> {
     });
   }
 
+  async findFriendshipByIds(sourceId: string, targetId: string): Promise<FriendShip | null> {
+    return await this.findOne({
+      where: [
+        { source: { id: sourceId }, target: { id: targetId } },
+        { source: { id: targetId }, target: { id: sourceId } },
+      ],
+      relations: ['source', 'target'],
+    });
+  }
+
   async findBlocked(sourceId: string, targetId: string, status: FriendStatus): Promise<FriendShip | null> {
     return await this.findOne({
       where: [{ source: { id: sourceId }, target: { id: targetId }, status: status }],
