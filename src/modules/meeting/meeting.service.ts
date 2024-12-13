@@ -6,7 +6,6 @@ import { ChangeStatusMeetingReqDto } from './dtos/request/change-status-meeting-
 import { CreateMeetingGroupReqDto } from './dtos/request/create-meeting-group-req-dto';
 import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
-import { FriendStatus } from 'src/common/db/entities/friendship.entity';
 
 @Injectable()
 export class MeetingService {
