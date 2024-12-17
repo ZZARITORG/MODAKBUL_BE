@@ -78,6 +78,7 @@ export class GroupRepository extends Repository<Group> {
         'group.name',
         'groupMember.id',
         'group.count',
+        'group.updatedAt',
         'user.id',
         'user.userId',
         'user.name',
