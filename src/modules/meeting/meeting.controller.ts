@@ -71,12 +71,4 @@ export class MeetingController {
   async acceptMeeting(@Body() acceptMeetingReqDto: ChangeStatusMeetingReqDto, @CurrentUser() userId: string) {
     return this.meetingService.acceptMeeting(acceptMeetingReqDto, userId);
   }
-
-  // @ApiOperation({ summary: '미팅 거절 API' })
-  // @ApiBearerAuth()
-  // @ApiResponse({ type: MeetingRejectResDto })
-  // @Post('reject')
-  // async rejectMeeting(@Body() rejectMeetingReqDto: ChangeStatusMeetingReqDto, @CurrentUser() userId: string) {
-  //   return this.meetingService.rejectMeeting(rejectMeetingReqDto, userId);
-  // }
 }
