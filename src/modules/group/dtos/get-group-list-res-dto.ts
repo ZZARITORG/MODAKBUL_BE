@@ -56,5 +56,8 @@ export class GetGroupListResDto {
   count: number;
 
   @ApiProperty({ description: '업데이트된 시간' })
+  createdAt: Date;
+
+  @ApiProperty({ description: '업데이트된 시간' })
   updatedAt: Date;
 }

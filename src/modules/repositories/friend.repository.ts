@@ -346,6 +346,8 @@ export class FriendRepository extends Repository<FriendShip> {
         userId: friendship.source.userId,
         name: friendship.source.name,
         profileUrl: friendship.source.profileUrl,
+        createdAt: friendship.source.createdAt,
+        updatedAt: friendship.source.updatedAt,
       };
     });
 
@@ -371,6 +373,8 @@ export class FriendRepository extends Repository<FriendShip> {
         userId: friendship.target.userId,
         name: friendship.target.name,
         profileUrl: friendship.target.profileUrl,
+        createdAt: friendship.target.createdAt,
+        updatedAt: friendship.target.updatedAt,
       };
     });
 

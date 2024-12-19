@@ -58,6 +58,7 @@ export class GroupService {
         }),
         count: group.count,
         updatedAt: group.updatedAt,
+        createdAt: group.createdAt,
       };
     });
 
