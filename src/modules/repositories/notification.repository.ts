@@ -28,6 +28,7 @@ export class NotificationRepository extends Repository<Notification> {
         id: notification.id,
         type: notification.type,
         sourceUserId: notification.sourceUser.userId,
+        createdAt: notification.createdAt,
         sourceUserName: notification.sourceUser.name,
       };
     });
