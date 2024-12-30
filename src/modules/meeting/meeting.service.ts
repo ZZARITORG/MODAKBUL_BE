@@ -24,7 +24,7 @@ export class MeetingService {
     }
 
     return await this.meetingRepo.createMeeting(createMeetingReqDto, userId);
-    // TODO 알림보내기
+    // TODO 알림보내기 : (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
   }
   async createMeetingGroup(createMeetingGroupDto: CreateMeetingGroupReqDto, userId: string) {
     const date = new Date(createMeetingGroupDto.date);
@@ -38,17 +38,14 @@ export class MeetingService {
       relations: ['members', 'members.user'],
     });
 
-    //그룹 생성
-    await this.meetingRepo.createMeetingByGroupId(userId, group, createMeetingGroupDto);
+    await this.meetingRepo.createMeetingByGroupId(userId, group, createMeetingGroupDto); //그룹 생성
 
-    //그룹 count 증가
     group.count++;
-    const savedGroup = await this.groupRepo.save(group);
+    const savedGroup = await this.groupRepo.save(group); //그룹 count 증가
 
-    //친구 count 증가
-    await this.friendShipRepo.countUp(userId, savedGroup);
+    await this.friendShipRepo.countUp(userId, savedGroup); //친구 count 증가
 
-    // TODO 알림보내기
+    // TODO 알림보내기 : (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
   }
   async acceptMeeting(acceptMeetingReqDto: ChangeStatusMeetingReqDto, userId: string) {
     const meeting = await this.meetingRepo.acceptMeeting(acceptMeetingReqDto, userId);
@@ -290,7 +287,7 @@ export class MeetingService {
     };
   }
 
-  //TODO: 미팅 취소할떄 호스트에게만 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
+  //TODO: 미팅 취소할떄 호스트에게만 알람 보내기 (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐, 책임분리 필요)
   async cancelMeeting(userId: string, meetingId: string) {
     const userMeeting = await this.meetingRepo.findUserMeeting(userId, meetingId);
 
@@ -306,7 +303,7 @@ export class MeetingService {
     await this.meetingRepo.cancelMeeting(userMeeting);
   }
 
-  //TODO: 미팅 삭제할때 전체 참여자들에게 취소 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
+  //TODO: 미팅 삭제할때 전체 참여자들에게 취소 알람 보내기 (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
   async deleteMeeting(userId: string, meetingId: string) {
     const meeting = await this.meetingRepo.findOne({ where: { id: meetingId } });
 
