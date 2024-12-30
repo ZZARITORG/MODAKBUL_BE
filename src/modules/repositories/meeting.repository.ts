@@ -480,4 +480,12 @@ export class MeetingRepository extends Repository<Meeting> {
       ])
       .getOne();
   }
+
+  async findUserMeeting(userId: string, meetingId: string) {
+    return this.userMeetingRepo.findOne({ where: { user: { id: userId }, meeting: { id: meetingId } } });
+  }
+
+  async cancelMeeting(userMeeting: UserMeetingRelation) {
+    await this.userMeetingRepo.save(userMeeting);
+  }
 }

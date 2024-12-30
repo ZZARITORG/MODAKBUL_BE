@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MEETING_REPO, MeetingRepository } from '../repositories/meeting.repository';
 import { CreateMeetingReqDto } from './dtos/request/create-meeting-req-dto';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
@@ -6,6 +6,7 @@ import { ChangeStatusMeetingReqDto } from './dtos/request/change-status-meeting-
 import { CreateMeetingGroupReqDto } from './dtos/request/create-meeting-group-req-dto';
 import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
+import { MeetingStatus } from 'src/common/db/entities/user-meeting-relation.entity';
 
 @Injectable()
 export class MeetingService {
@@ -289,7 +290,23 @@ export class MeetingService {
     };
   }
 
-  //TODO: 미팅 삭제할때 참여자들에게 취소 알람 보내기
+  //TODO: 미팅 취소할떄 호스트에게만 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
+  async cancelMeeting(userId: string, meetingId: string) {
+    const userMeeting = await this.meetingRepo.findUserMeeting(userId, meetingId);
+
+    if (!userMeeting) {
+      throw new NotFoundException('미팅을 찾을 수 없습니다.');
+    }
+
+    if (userMeeting.status !== MeetingStatus.ACCEPTED) {
+      throw new ForbiddenException('수락한 미팅만 취소 가능합니다.');
+    }
+
+    userMeeting.status = MeetingStatus.REJECTED;
+    await this.meetingRepo.cancelMeeting(userMeeting);
+  }
+
+  //TODO: 미팅 삭제할때 전체 참여자들에게 취소 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
   async deleteMeeting(userId: string, meetingId: string) {
     const meeting = await this.meetingRepo.findOne({ where: { id: meetingId } });
 
@@ -297,6 +314,6 @@ export class MeetingService {
       throw new Error('호스트만 미팅을 삭제 가능합니다.');
     }
 
-    return await this.meetingRepo.delete({ id: meetingId });
+    await this.meetingRepo.delete({ id: meetingId });
   }
 }

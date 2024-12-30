@@ -72,11 +72,17 @@ export class MeetingController {
     return this.meetingService.acceptMeeting(acceptMeetingReqDto, userId);
   }
 
+  @ApiOperation({ summary: '미팅 참여했다가  취소 API' })
+  @ApiBearerAuth()
+  @Post('cancel/:id')
+  async cancelMeeting(@CurrentUser() userId: string, @Param() param: MeetingIdReqDto) {
+    return this.meetingService.cancelMeeting(userId, param.id);
+  }
+
   @ApiOperation({ summary: '호스트 미팅삭제 API' })
   @ApiBearerAuth()
-  @ApiResponse({ type: MeetingAcceptResDto })
   @Delete(':id')
-  async deleteMeeting(@CurrentUser() userId: string, @Param() param: MeetingIdReqDto) {
+  async deleteMeeting(@CurrentUser() userId: string, @Param() param: MeetingIdReqDto): Promise<void> {
     return this.meetingService.deleteMeeting(userId, param.id);
   }
 }
