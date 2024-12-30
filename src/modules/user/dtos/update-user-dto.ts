@@ -27,11 +27,6 @@ export class UpdateUserDto {
   @IsBoolean()
   isFriendAlarm: boolean;
 
-  @ApiProperty({ description: '미팅알람 수신 여부', required: false })
-  @IsOptional()
-  @IsBoolean()
-  isMeetingAlarm: boolean;
-
   @ApiProperty({ description: '연락처 제공 동의', required: false })
   @IsOptional()
   @IsBoolean()

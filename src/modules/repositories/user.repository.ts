@@ -23,17 +23,6 @@ export class UserRepository extends Repository<User> {
   }
 
   async saveUser(signUpReqDto: SignUpReqDto) {
-    const user = this.create({
-      userId: signUpReqDto.userId,
-      name: signUpReqDto.name,
-      phoneNo: signUpReqDto.phoneNo,
-      profileUrl: signUpReqDto.profileUrl,
-      fcmToken: signUpReqDto.fcmToken,
-      isContactAgree: signUpReqDto.isContactAgree,
-    });
-
-    const result = await this.save(user);
-
-    return result;
+    return await this.save(signUpReqDto);
   }
 }

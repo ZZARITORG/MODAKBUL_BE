@@ -25,11 +25,8 @@ export class User extends BaseTable {
   @Column('simple-array', { comment: 'fcm토큰' })
   fcmToken: string[];
 
-  @Column({ name: 'is_friend_alarm', comment: '친구 알림 수신여부', default: true })
+  @Column({ name: 'is_friend_alarm', comment: '알수도 있는 친구 허용', default: true })
   isFriendAlarm: boolean;
-
-  @Column({ name: 'is_meeting_alarm', comment: '모닥불 알림 수신여부', default: true })
-  isMeetingAlarm: boolean;
 
   @Column({ name: 'is_contact_agree', comment: '연락처 제공 동의', default: false })
   isContactAgree: boolean;
