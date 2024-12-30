@@ -9,6 +9,7 @@ import { UpdateUserDto } from './dtos/update-user-dto';
 import { UserService } from './user.service';
 import { GetOtherResDto } from './dtos/get-other-res-dto';
 import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
+import { UserSearchDto } from './dtos/search-user-dto';
 
 @Controller('user')
 @ApiTags('USER')
@@ -18,8 +19,8 @@ export class UserController {
   @ApiOperation({ summary: '유저 검색 API' })
   @ApiBearerAuth()
   @Get()
-  async searchUsers(@Query('search') search: string): Promise<UserSearchResponseDto[]> {
-    return this.userService.searchUsers(search);
+  async searchUsers(@Query() query: UserSearchDto): Promise<UserSearchResponseDto[]> {
+    return this.userService.searchUsers(query);
   }
 
   @ApiOperation({ summary: '본인 정보 조회 API' })

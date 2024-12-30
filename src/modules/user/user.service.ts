@@ -10,6 +10,7 @@ import { UpdateUserDto } from './dtos/update-user-dto';
 import * as _ from 'lodash';
 import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { LoginReqDto } from '../auth/dtos/login-req-dto';
+import { UserSearchDto } from './dtos/search-user-dto';
 
 @Injectable()
 export class UserService {
@@ -23,13 +24,20 @@ export class UserService {
     return plainToInstance(UpdateResultResDto, result);
   }
 
-  async searchUsers(userSearchDto: string): Promise<UserSearchResponseDto[]> {
-    const search = userSearchDto;
+  async searchUsers(query: UserSearchDto): Promise<UserSearchResponseDto[]> {
+    const search = query.search;
+    const page = query.page;
+
     const users = await this.userRepo.find({
       where: [
         { name: Like(`%${search}%`) }, // 이름으로 검색
         { userId: Like(`%${search}%`) }, // ID로 검색
       ],
+      skip: page * 20 - 20,
+      take: 20,
+      order: {
+        id: 'ASC',
+      },
     });
 
     // UserResponseDto로 매핑
