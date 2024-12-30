@@ -16,10 +16,22 @@ export class MeetingService {
   ) {}
 
   async createMeeting(createMeetingReqDto: CreateMeetingReqDto, userId: string): Promise<Meeting> {
+    const date = new Date(createMeetingReqDto.date);
+
+    if (date < new Date()) {
+      throw new Error('약속시간이 현재시간보다 이전입니다.');
+    }
+
     return await this.meetingRepo.createMeeting(createMeetingReqDto, userId);
     // TODO 알림보내기
   }
   async createMeetingGroup(createMeetingGroupDto: CreateMeetingGroupReqDto, userId: string) {
+    const date = new Date(createMeetingGroupDto.date);
+
+    if (date < new Date()) {
+      throw new Error('약속시간이 현재시간보다 이전입니다.');
+    }
+
     const group = await this.groupRepo.findOne({
       where: { id: createMeetingGroupDto.groupId },
       relations: ['members', 'members.user'],

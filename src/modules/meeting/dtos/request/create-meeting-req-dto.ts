@@ -27,7 +27,7 @@ export class CreateMeetingReqDto {
   @IsNotEmpty()
   detailAddress: string;
 
-  @ApiProperty({ description: '약속 날짜,시간' })
+  @ApiProperty({ description: '약속 날짜,시간 (약속시각은 UTC기준으로 보내주세요)' })
   @IsString()
   @IsNotEmpty()
   date: Date;

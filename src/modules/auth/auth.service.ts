@@ -23,6 +23,10 @@ export class AuthService {
 
     const user = await this.userRepo.saveUser(signUpReqDto);
 
+    if (!user) {
+      throw new BadRequestException('회원 가입에 실패하였습니다.');
+    }
+
     //인증 토큰 생성
     const { accessToken, refreshToken } = await this.login(user.phoneNo);
 
