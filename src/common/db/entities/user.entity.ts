@@ -31,6 +31,9 @@ export class User extends BaseTable {
   @Column({ name: 'is_meeting_alarm', comment: '모닥불 알림 수신여부', default: true })
   isMeetingAlarm: boolean;
 
+  @Column({ name: 'is_contact_agree', comment: '연락처 제공 동의', default: false })
+  isContactAgree: boolean;
+
   @OneToMany(() => UserMeetingRelation, (userMeetingRelation) => userMeetingRelation.user, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'meeting_relation_id' })
   meetingRelation: UserMeetingRelation[];

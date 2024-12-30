@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { HyphenTel } from 'src/common/decorators/trans-phone-no.decorator';
 
 export class SignUpReqDto {
@@ -29,4 +29,9 @@ export class SignUpReqDto {
   @IsString({ each: true })
   @IsNotEmpty()
   fcmToken: string[];
+
+  @ApiProperty({ description: '연락처 제공 동의' })
+  @IsOptional()
+  @IsBoolean()
+  isContactAgree: boolean = false;
 }

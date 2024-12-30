@@ -52,8 +52,6 @@ export class UserService {
         where: { userId: updateUserDto.userId },
       });
 
-      console.log(existingUserId);
-
       if (!_.isEmpty(existingUserId)) {
         throw new BadRequestException(`${updateUserDto.userId} 아이디가 이미 존재합니다.`);
       }

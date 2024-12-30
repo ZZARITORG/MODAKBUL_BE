@@ -29,6 +29,7 @@ export class UserRepository extends Repository<User> {
       phoneNo: signUpReqDto.phoneNo,
       profileUrl: signUpReqDto.profileUrl,
       fcmToken: signUpReqDto.fcmToken,
+      isContactAgree: signUpReqDto.isContactAgree,
     });
 
     const result = await this.save(user);

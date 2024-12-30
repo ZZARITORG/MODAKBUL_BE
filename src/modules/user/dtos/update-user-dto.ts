@@ -31,4 +31,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isMeetingAlarm: boolean;
+
+  @ApiProperty({ description: '연락처 제공 동의', required: false })
+  @IsOptional()
+  @IsBoolean()
+  isContactAgree: boolean;
 }
