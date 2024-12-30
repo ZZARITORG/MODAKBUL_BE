@@ -288,4 +288,15 @@ export class MeetingService {
       ),
     };
   }
+
+  //TODO: 미팅 삭제할때 참여자들에게 취소 알람 보내기
+  async deleteMeeting(userId: string, meetingId: string) {
+    const meeting = await this.meetingRepo.findOne({ where: { id: meetingId } });
+
+    if (meeting.hostId !== userId) {
+      throw new Error('호스트만 미팅을 삭제 가능합니다.');
+    }
+
+    return await this.meetingRepo.delete({ id: meetingId });
+  }
 }

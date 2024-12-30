@@ -1,8 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { MeetingIdReqDto } from 'src/common/dto/meeting-id-req-dto';
 import { ChangeStatusMeetingReqDto } from './dtos/request/change-status-meeting-req-dto';
 import { CreateMeetingGroupReqDto } from './dtos/request/create-meeting-group-req-dto';
 import { CreateMeetingReqDto } from './dtos/request/create-meeting-req-dto';
@@ -12,6 +11,7 @@ import { HostMeetingResDto } from './dtos/response/host-meeting-res-dto';
 import { MeetingAcceptResDto } from './dtos/response/meeting-accept-res-dto';
 import { PendingMeetingResDto } from './dtos/response/pending-meeting-res-dto';
 import { MeetingService } from './meeting.service';
+import { MeetingIdReqDto } from './dtos/request/meeting-id-req-dto';
 
 @Controller('meeting')
 @ApiTags('MEETING')
@@ -70,5 +70,13 @@ export class MeetingController {
   @Post('accept')
   async acceptMeeting(@Body() acceptMeetingReqDto: ChangeStatusMeetingReqDto, @CurrentUser() userId: string) {
     return this.meetingService.acceptMeeting(acceptMeetingReqDto, userId);
+  }
+
+  @ApiOperation({ summary: '호스트 미팅삭제 API' })
+  @ApiBearerAuth()
+  @ApiResponse({ type: MeetingAcceptResDto })
+  @Delete(':id')
+  async deleteMeeting(@CurrentUser() userId: string, @Param() param: MeetingIdReqDto) {
+    return this.meetingService.deleteMeeting(userId, param.id);
   }
 }
