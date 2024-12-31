@@ -73,48 +73,39 @@ export class MeetingRepository extends Repository<Meeting> {
         user: user,
       });
     });
-    //알림db에 추가
-    for (const user of users) {
-      await this.createNotification(
-        host.id, // 호스트 ID (sourceUser)
-        user.id, // 초대된 멤버 ID (targetUser)
-        NotificationType.MEETING_ALARM,
-        savedMeeting.id,
-      );
-    }
-    // FriendShip 카운트 업데이트 로직
-    for (const user of users) {
-      this.logger.log(`호스트아이디다: ${host.id}`);
-      this.logger.log(`타겟아이디다: ${user.id}`);
-      const friendShipRepository = this.dataSource.getRepository(FriendShip);
-      // const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: host.id } });
-      // const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: user.id } });
-      const friendShip = await friendShipRepository.findOne({
-        where: [
-          { source: { id: host.id }, target: { id: user.id } },
-          { source: { id: user.id }, target: { id: host.id } },
-        ],
-        relations: ['source', 'target'],
-      });
-      if (friendShip) {
-        this.logger.log(`아이디아이디아이디다: ${friendShip.source.id}`);
-        if (friendShip.source) {
-          // userId가 source인 경우 sourcecount 증가
-          if (friendShip.source.id === host.id) {
-            friendShip.sourcecount += 1;
-          }
-          // userId가 target인 경우 targetcount 증가
-          else if (friendShip.target.id === host.id) {
-            friendShip.targetcount += 1;
-          }
-          await friendShipRepository.save(friendShip); // FriendShip 엔티티 저장
-        } else {
-          throw new BadRequestException('친구가 아닌 사용자로 모닥불을 생성할 수 없슨니다.');
-        }
-      } else {
-        throw new BadRequestException('');
-      }
-    }
+    // // FriendShip 카운트 업데이트 로직
+    // for (const user of users) {
+    //   this.logger.log(`호스트아이디다: ${host.id}`);
+    //   this.logger.log(`타겟아이디다: ${user.id}`);
+    //   const friendShipRepository = this.dataSource.getRepository(FriendShip);
+    //   // const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: host.id } });
+    //   // const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: user.id } });
+    //   const friendShip = await friendShipRepository.findOne({
+    //     where: [
+    //       { source: { id: host.id }, target: { id: user.id } },
+    //       { source: { id: user.id }, target: { id: host.id } },
+    //     ],
+    //     relations: ['source', 'target'],
+    //   });
+    //   if (friendShip) {
+    //     this.logger.log(`아이디아이디아이디다: ${friendShip.source.id}`);
+    //     if (friendShip.source) {
+    //       // userId가 source인 경우 sourcecount 증가
+    //       if (friendShip.source.id === host.id) {
+    //         friendShip.sourcecount += 1;
+    //       }
+    //       // userId가 target인 경우 targetcount 증가
+    //       else if (friendShip.target.id === host.id) {
+    //         friendShip.targetcount += 1;
+    //       }
+    //       await friendShipRepository.save(friendShip); // FriendShip 엔티티 저장
+    //     } else {
+    //       throw new BadRequestException('친구가 아닌 사용자로 모닥불을 생성할 수 없슨니다.');
+    //     }
+    //   } else {
+    //     throw new BadRequestException('');
+    //   }
+    // }
 
     await this.userMeetingRepo.save(hostMeeting);
 
@@ -149,6 +140,7 @@ export class MeetingRepository extends Repository<Meeting> {
         });
       }),
     );
+    return meeting;
   }
 
   async createMeetingGroup(createMeetingGroupReqDto: CreateMeetingGroupReqDto, userId: string) {
@@ -482,7 +474,10 @@ export class MeetingRepository extends Repository<Meeting> {
   }
 
   async findUserMeeting(userId: string, meetingId: string) {
-    return this.userMeetingRepo.findOne({ where: { user: { id: userId }, meeting: { id: meetingId } } });
+    return this.userMeetingRepo.findOne({
+      where: { user: { id: userId }, meeting: { id: meetingId } },
+      relations: { meeting: true },
+    });
   }
 
   async cancelMeeting(userMeeting: UserMeetingRelation) {

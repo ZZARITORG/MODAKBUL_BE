@@ -5,11 +5,17 @@ import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { MEETING_REPO, MeetingRepository } from '../repositories/meeting.repository';
 import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationRepository } from '../repositories/notification.repository';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
+  imports: [NotificationModule],
   controllers: [MeetingController],
   providers: [
     MeetingService,
+    NotificationService,
+    NotificationRepository,
     {
       provide: USER_REPO,
       useClass: UserRepository,

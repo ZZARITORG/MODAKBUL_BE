@@ -435,4 +435,33 @@ export class FriendRepository extends Repository<FriendShip> {
       }
     }
   }
+  async countUpByIds(hostId: string, friendIds: string[]) {
+    // FrequentFriend 생성 또는 업데이트
+
+    for (const friendId of friendIds) {
+      const friendShip = await this.findOne({
+        where: [
+          { source: { id: hostId }, target: { id: friendId } },
+          { source: { id: friendId }, target: { id: hostId } },
+        ],
+        relations: ['source', 'target'],
+      });
+
+      if (friendShip) {
+        if (friendShip.source) {
+          // userId가 source인 경우 sourcecount 증가
+          if (friendShip.source.id === hostId) {
+            friendShip.sourcecount += 1;
+          }
+          // userId가 target인 경우 targetcount 증가
+          else if (friendShip.target.id === hostId) {
+            friendShip.targetcount += 1;
+          }
+          await this.save(friendShip); // FriendShip 엔티티 저장
+        }
+      } else {
+        throw new BadRequestException('그룹멤버중에 친구가 아닌 사용자가 존재합니다.');
+      }
+    }
+  }
 }
