@@ -318,7 +318,7 @@ export class MeetingService {
       throw new ForbiddenException('수락한 미팅만 취소 가능합니다.');
     }
 
-    userMeeting.status = MeetingStatus.REJECTED;
+    userMeeting.status = MeetingStatus.PENDING;
     await this.meetingRepo.cancelMeeting(userMeeting);
     await this.notificationService.createNotification({
       sourceUserId: userId,
