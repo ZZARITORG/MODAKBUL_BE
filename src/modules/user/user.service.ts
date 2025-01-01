@@ -14,6 +14,7 @@ import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import * as admin from 'firebase-admin';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class UserService {
@@ -22,7 +23,7 @@ export class UserService {
     @Inject(FRIEND_REPO) readonly friendRepo: FriendRepository,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+    const serviceAccount = JSON.parse(readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8'));
 
     initializeApp({
       credential: admin.credential.cert(serviceAccount),
