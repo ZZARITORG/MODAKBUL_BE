@@ -7,6 +7,8 @@ import { CreateMeetingGroupReqDto } from './dtos/request/create-meeting-group-re
 import { GROUP_REPO, GroupRepository } from '../repositories/group.repository';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
 import { MeetingStatus } from 'src/common/db/entities/user-meeting-relation.entity';
+import { NotificationService } from '../notification/notification.service';
+import { NotificationType } from 'src/common/db/entities/notification.entitiy';
 
 @Injectable()
 export class MeetingService {
@@ -14,6 +16,7 @@ export class MeetingService {
     @Inject(MEETING_REPO) private readonly meetingRepo: MeetingRepository,
     @Inject(GROUP_REPO) private readonly groupRepo: GroupRepository,
     @Inject(FRIEND_REPO) private readonly friendShipRepo: FriendRepository,
+    private readonly notificationService: NotificationService,
   ) {}
 
   async createMeeting(createMeetingReqDto: CreateMeetingReqDto, userId: string): Promise<Meeting> {
@@ -22,9 +25,18 @@ export class MeetingService {
     if (date < new Date()) {
       throw new Error('약속시간이 현재시간보다 이전입니다.');
     }
-
-    return await this.meetingRepo.createMeeting(createMeetingReqDto, userId);
-    // TODO 알림보내기 : (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
+    //친구카운트증가
+    await this.friendShipRepo.countUpByIds(userId, createMeetingReqDto.friendIds);
+    const meeting = await this.meetingRepo.createMeeting(createMeetingReqDto, userId);
+    for (const targetUserId of createMeetingReqDto.friendIds) {
+      await this.notificationService.createNotification({
+        sourceUserId: userId,
+        targetUserId,
+        type: NotificationType.MEETING_ALARM, // 알림 타입 설정
+        meetingId: meeting.id,
+      });
+    }
+    return meeting;
   }
   async createMeetingGroup(createMeetingGroupDto: CreateMeetingGroupReqDto, userId: string) {
     const date = new Date(createMeetingGroupDto.date);
@@ -37,15 +49,22 @@ export class MeetingService {
       where: { id: createMeetingGroupDto.groupId },
       relations: ['members', 'members.user'],
     });
-
-    await this.meetingRepo.createMeetingByGroupId(userId, group, createMeetingGroupDto); //그룹 생성
-
+    // 그룹 생성
+    const savedMeeting = await this.meetingRepo.createMeetingByGroupId(userId, group, createMeetingGroupDto);
+    //그룹 count 증가
     group.count++;
-    const savedGroup = await this.groupRepo.save(group); //그룹 count 증가
+    const savedGroup = await this.groupRepo.save(group);
 
-    await this.friendShipRepo.countUp(userId, savedGroup); //친구 count 증가
-
-    // TODO 알림보내기 : (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
+    //친구 count 증가
+    await this.friendShipRepo.countUp(userId, savedGroup);
+    for (const member of group.members) {
+      await this.notificationService.createNotification({
+        sourceUserId: userId,
+        targetUserId: member.user.id,
+        type: NotificationType.MEETING_ALARM,
+        meetingId: savedMeeting.id, // 미팅 ID
+      });
+    }
   }
   async acceptMeeting(acceptMeetingReqDto: ChangeStatusMeetingReqDto, userId: string) {
     const meeting = await this.meetingRepo.acceptMeeting(acceptMeetingReqDto, userId);
@@ -287,7 +306,7 @@ export class MeetingService {
     };
   }
 
-  //TODO: 미팅 취소할떄 호스트에게만 알람 보내기 (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐, 책임분리 필요)
+  //TODO: 미팅 취소할떄 호스트에게만 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
   async cancelMeeting(userId: string, meetingId: string) {
     const userMeeting = await this.meetingRepo.findUserMeeting(userId, meetingId);
 
@@ -299,18 +318,40 @@ export class MeetingService {
       throw new ForbiddenException('수락한 미팅만 취소 가능합니다.');
     }
 
-    userMeeting.status = MeetingStatus.REJECTED;
+    userMeeting.status = MeetingStatus.PENDING;
     await this.meetingRepo.cancelMeeting(userMeeting);
+    await this.notificationService.createNotification({
+      sourceUserId: userId,
+      targetUserId: userMeeting.meeting.hostId,
+      type: NotificationType.MEETING_CANCEL_PARTICIPANT,
+      meetingId,
+    });
   }
 
-  //TODO: 미팅 삭제할때 전체 참여자들에게 취소 알람 보내기 (알람 모듈에서 구현하고 여기서는 호출만 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐 ,책임분리 필요)
+  //TODO: 미팅 삭제할때 전체 참여자들에게 취소 알람 보내기 (알람 모듈의 서비스 호출해서 알람 보내기 -> 여기서 로직짜면 너무 길어져서 가독성 떨어짐)
   async deleteMeeting(userId: string, meetingId: string) {
-    const meeting = await this.meetingRepo.findOne({ where: { id: meetingId } });
-
+    const meeting = await this.meetingRepo.findOne({
+      where: { id: meetingId },
+      relations: ['userMeetingRelations', 'userMeetingRelations.user'],
+    });
+    console.log(`meetingddddddddddddddd${JSON.stringify(meeting.userMeetingRelations)}`);
     if (meeting.hostId !== userId) {
       throw new Error('호스트만 미팅을 삭제 가능합니다.');
     }
 
     await this.meetingRepo.delete({ id: meetingId });
+    for (const userMeetingRelation of meeting.userMeetingRelations) {
+      console.log(`타겟유저의 아이디입니다${userMeetingRelation.user.id}`);
+      const targetUserId = userMeetingRelation.user.id;
+      if (targetUserId === meeting.hostId) {
+        continue;
+      }
+      // 미팅 삭제 알림
+      await this.notificationService.createNotification({
+        sourceUserId: userId,
+        targetUserId: targetUserId,
+        type: NotificationType.MEETING_CANCEL_HOST, // 호스트가 미팅을 삭제한 경우
+      });
+    }
   }
 }

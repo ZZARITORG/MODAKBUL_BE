@@ -10,6 +10,7 @@ import { UserService } from './user.service';
 import { GetOtherResDto } from './dtos/get-other-res-dto';
 import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { UserSearchDto } from './dtos/search-user-dto';
+import { UidReqDto } from './dtos/uid-req-dto';
 
 @Controller('user')
 @ApiTags('USER')
@@ -54,8 +55,8 @@ export class UserController {
 
   @ApiOperation({ summary: '유저 삭제 API' })
   @ApiBearerAuth()
-  @Delete()
-  deleteUser(@CurrentUser() targetId: string): Promise<UpdateResultResDto> {
-    return this.userService.deleteUser(targetId);
+  @Delete(':uid')
+  deleteUser(@CurrentUser() targetId: string, @Param() param: UidReqDto): Promise<UpdateResultResDto> {
+    return this.userService.deleteUser(targetId, param.uid);
   }
 }
