@@ -23,16 +23,16 @@ export class UserService {
     @Inject(FRIEND_REPO) readonly friendRepo: FriendRepository,
   ) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const serviceAccount = JSON.parse(readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8'));
-    initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      projectId: process.env.FIREBASE_PROJECT_ID,
-    });
+    // const serviceAccount = JSON.parse(readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8'));
+    // initializeApp({
+    //   credential: admin.credential.cert(serviceAccount),
+    //   projectId: process.env.FIREBASE_PROJECT_ID,
+    // });
   }
 
   async deleteUser(targetId: string, uid: string): Promise<UpdateResultResDto> {
     try {
-      await getAuth().deleteUser(uid);
+      // await getAuth().deleteUser(uid);
       const result = await this.userRepo.delete({ id: targetId });
       return plainToInstance(UpdateResultResDto, result);
     } catch (err) {
