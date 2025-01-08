@@ -1,27 +1,44 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
+import { initializeApp } from 'firebase-admin/app';
+import { getAuth } from 'firebase-admin/auth';
+import * as _ from 'lodash';
 import { Like } from 'typeorm';
+import { LoginReqDto } from '../auth/dtos/login-req-dto';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { GetUserResDto } from './dtos/get-user-res-dto';
+import { UserSearchDto } from './dtos/search-user-dto';
 import { UserSearchResponseDto } from './dtos/search-user-res-dto';
+import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
-import * as _ from 'lodash';
-import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
-import { LoginReqDto } from '../auth/dtos/login-req-dto';
-import { UserSearchDto } from './dtos/search-user-dto';
+import * as admin from 'firebase-admin';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class UserService {
   constructor(
     @Inject(USER_REPO) readonly userRepo: UserRepository,
     @Inject(FRIEND_REPO) readonly friendRepo: FriendRepository,
-  ) {}
+  ) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const serviceAccount = JSON.parse(readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, 'utf8'));
+    initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      projectId: process.env.FIREBASE_PROJECT_ID,
+    });
+  }
 
-  async deleteUser(targetId: string): Promise<UpdateResultResDto> {
-    const result = await this.userRepo.delete({ id: targetId });
-    return plainToInstance(UpdateResultResDto, result);
+  async deleteUser(targetId: string, uid: string): Promise<UpdateResultResDto> {
+    try {
+      await getAuth().deleteUser(uid);
+      const result = await this.userRepo.delete({ id: targetId });
+      return plainToInstance(UpdateResultResDto, result);
+    } catch (err) {
+      console.error(err);
+      throw new NotFoundException('User not found');
+    }
   }
 
   async searchUsers(query: UserSearchDto): Promise<UserSearchResponseDto[]> {

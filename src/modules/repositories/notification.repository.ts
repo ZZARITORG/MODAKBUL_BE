@@ -4,6 +4,7 @@ import { Notification, NotificationType } from 'src/common/db/entities/notificat
 import { User } from 'src/common/db/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { NotificationInfoDto } from '../notification/dtos/notification-info-dto';
+export const NOTIFICATION_REPO = 'NOTIFICATION_REPO';
 
 @Injectable()
 export class NotificationRepository extends Repository<Notification> {
