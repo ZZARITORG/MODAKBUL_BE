@@ -7,6 +7,7 @@ import { FriendRejectDto } from './dtos/friend-reject-dto';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { FriendDeleteDto } from './dtos/friend-delete-dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { FriendContactDto } from './dtos/firend-contact-dto';
 
 @Controller('friend')
 @ApiTags('FRIEND')
@@ -52,9 +53,9 @@ export class FriendController {
   }
   @ApiOperation({ summary: '알 수도 있는 친구 조회 API' })
   @ApiBearerAuth()
-  @Get('suggested-friends')
-  async getSuggestedFriends(@CurrentUser() sourceId: string) {
-    return await this.friendService.getSuggestedFriends(sourceId);
+  @Post('suggested-friends')
+  async getSuggestedFriends(@Body() friendContactDto: FriendContactDto, @CurrentUser() sourceId: string) {
+    return await this.friendService.getSuggestedFriends(friendContactDto, sourceId);
   }
   @ApiOperation({ summary: '친구 리스트 조회 API' })
   @ApiBearerAuth()

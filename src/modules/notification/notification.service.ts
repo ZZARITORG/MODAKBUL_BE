@@ -34,6 +34,6 @@ export class NotificationService {
 
     await this.notificationRepository.save(notification);
 
-    this.sseService.sendToClient(targetUserId, type);
+    this.sseService.sendToClient(targetUserId, notification);
   }
 }

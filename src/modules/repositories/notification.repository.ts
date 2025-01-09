@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Meeting } from 'src/common/db/entities/meeting.entity';
-import { Notification, NotificationType } from 'src/common/db/entities/notification.entitiy';
+import { Notification } from 'src/common/db/entities/notification.entitiy';
 import { User } from 'src/common/db/entities/user.entity';
 import { DataSource, Repository } from 'typeorm';
 import { NotificationInfoDto } from '../notification/dtos/notification-info-dto';
@@ -14,23 +14,6 @@ export class NotificationRepository extends Repository<Notification> {
   constructor(private dataSource: DataSource) {
     super(Notification, dataSource.createEntityManager());
     this.meetingRepo = dataSource.getRepository(Meeting);
-  }
-  private async createNotification(
-    sourceUserId: string,
-    targetUserId: string,
-    type: NotificationType,
-    meetingId?: string,
-  ): Promise<void> {
-    const notificationRepository = this.dataSource.getRepository(Notification); // Notification 레포지토리 가져오기
-    const notification = notificationRepository.create({
-      type: type, // 알림 타입 설정
-      sourceUser: { id: sourceUserId }, // 친구 요청을 보낸 사람의 UUID
-      targetUser: { id: targetUserId }, // 요청을 받은 사람의 UUID
-      meetingId, // 약속 UUID (옵션)
-    });
-
-    await notificationRepository.save(notification); // 알림 저장
-    this.logger.log(`알림이 생성되었습니다: ${JSON.stringify(notification)}`); // 로그에 알림 정보 기록
   }
 
   async getNotification(userId: string): Promise<NotificationInfoDto[]> {
