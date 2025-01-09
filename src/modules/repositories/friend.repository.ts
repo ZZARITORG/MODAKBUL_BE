@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { FriendShip, FriendStatus } from 'src/common/db/entities/friendship.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { FriendReqDto } from '../friend/dtos/friend-req-dto';
 import { User } from 'src/common/db/entities/user.entity';
 import { FriendBlockDto } from '../friend/dtos/friend-block-dto';
@@ -83,7 +83,7 @@ export class FriendRepository extends Repository<FriendShip> {
       return await this.save(friendship);
     }
   }
-  async getSuggestedFriends(userId: string): Promise<FriendSuggestionDto[]> {
+  async getSuggestedFriends(userId: string, contactList: string[]): Promise<FriendSuggestionDto[]> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: userId } });
 
     if (!sourceUser) {
@@ -133,6 +133,28 @@ export class FriendRepository extends Repository<FriendShip> {
           profileUrl: friendOfFriend.profileUrl,
           mutualFriendCount,
         });
+        if (contactList && contactList.length > 0) {
+          const contacts = await this.dataSource.getRepository(User).find({
+            where: {
+              phoneNo: In(contactList), // 연락처 배열에 포함된 사용자 검색
+            },
+          });
+          for (const contact of contacts) {
+            // 이미 추천된 사용자나 현재 사용자인 경우 제외
+            if (contact.id === sourceUser.id || suggestedFriends.some((s) => s.id === contact.id)) {
+              continue;
+            }
+            // 함께 아는 친구 수 계산
+            const mutualFriendCount = await this.getMutualFriendCount(sourceUser.id, contact.id);
+            suggestedFriends.push({
+              id: contact.id,
+              userId: contact.userId,
+              name: contact.name,
+              profileUrl: contact.profileUrl,
+              mutualFriendCount, // 연락처 기반 추천이므로 기본 값으로 설정
+            });
+          }
+        }
       }
     }
 

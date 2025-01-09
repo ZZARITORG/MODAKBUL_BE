@@ -9,6 +9,7 @@ import { FriendInfoDto } from './dtos/friend-info-dto';
 import { FriendDeleteDto } from './dtos/friend-delete-dto';
 import { FriendListDto } from './dtos/friend-list-dto';
 import { FriendSuggestionDto } from './dtos/firend-suggest-dto';
+import { FriendContactDto } from './dtos/firend-contact-dto';
 
 @Injectable()
 export class FriendService {
@@ -32,8 +33,8 @@ export class FriendService {
     // Fetch the friend list using the user ID from the DTO
     return this.friendRepository.getFriends(sourceId);
   }
-  async getSuggestedFriends(sourceId: string): Promise<FriendSuggestionDto[]> {
-    return this.friendRepository.getSuggestedFriends(sourceId);
+  async getSuggestedFriends(friendContactDto: FriendContactDto, sourceId: string): Promise<FriendSuggestionDto[]> {
+    return this.friendRepository.getSuggestedFriends(sourceId, friendContactDto.contacts || []);
   }
   async friendDelete(friendDeleteDto: FriendDeleteDto, sourceId: string): Promise<void> {
     return this.friendRepository.removeFriendship(friendDeleteDto, sourceId); // DTO 전달
