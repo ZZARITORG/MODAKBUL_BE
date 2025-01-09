@@ -97,6 +97,9 @@ export class UserService {
   }
 
   async getUser(id: string, targetId: string) {
+    let source: string;
+    let target: string;
+
     const user = await this.userRepo
       .createQueryBuilder('user')
       .leftJoinAndSelect(
@@ -122,7 +125,18 @@ export class UserService {
       throw new NotFoundException('사용자를 찾을 수 없습니다');
     }
 
+    const mutualCount = await this.friendRepo.getMutualFriendCount(id, targetId);
+
     const status = user?.receivedFriendships[0]?.status ?? user?.sentFriendships[0]?.status ?? 'NONE';
+
+    if (!_.isEmpty(user.sentFriendships)) {
+      source = targetId;
+      target = id;
+    }
+    if (!_.isEmpty(user.receivedFriendships)) {
+      source = id;
+      target = targetId;
+    }
 
     return {
       id: user.id,
@@ -131,6 +145,9 @@ export class UserService {
       phoneNo: user.phoneNo,
       profileUrl: user.profileUrl,
       status,
+      mutualCount,
+      sourceId: source,
+      targetId: target,
     };
   }
 

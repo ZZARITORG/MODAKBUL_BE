@@ -15,12 +15,10 @@ import { NotificationModule } from '../notification/notification.module';
   providers: [
     MeetingService,
     NotificationService,
-
     {
       provide: NOTIFICATION_REPO,
       useClass: NotificationRepository,
     },
-
     {
       provide: USER_REPO,
       useClass: UserRepository,
