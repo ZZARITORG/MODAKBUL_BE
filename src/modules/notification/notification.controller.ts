@@ -5,7 +5,6 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { Observable } from 'rxjs';
 import { SseService } from './sse.service';
 import { map } from 'rxjs/operators';
-import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('notification')
 @ApiTags('NOTIFICATION')
