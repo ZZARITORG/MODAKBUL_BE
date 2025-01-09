@@ -248,7 +248,7 @@ export class MeetingRepository extends Repository<Meeting> {
       await this.createNotification(
         host.id, // 호스트 ID (sourceUser)
         user.id, // 초대된 사용자 ID (targetUser)
-        NotificationType.GROUP_INVITATION,
+        NotificationType.MEETING_ALARM,
         savedMeeting.id, // 회의 ID
       );
     }

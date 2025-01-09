@@ -5,7 +5,6 @@ import { User } from './user.entity';
 // 알림 유형을 정의하기 위한 enum
 export enum NotificationType {
   FRIEND_REQUEST = 'FRIEND_REQUEST',
-  GROUP_INVITATION = 'GROUP_INVITATION',
   MEETING_ALARM = 'MEETING_ALARM',
   MEETING_CANCEL_PARTICIPANT = 'MEETING_CANCEL_PARTICIPANT', // 참여자 취소 알림
   MEETING_CANCEL_HOST = 'MEETING_CANCEL_HOST', // 호스트 취소 알림
