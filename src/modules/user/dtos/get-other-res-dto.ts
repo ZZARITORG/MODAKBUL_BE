@@ -26,4 +26,13 @@ export class GetOtherResDto {
 
   @ApiProperty({ description: '친구 관계', enum: StatusResDto })
   status: StatusResDto;
+
+  @ApiProperty({ description: '함께 아는 친구 수' })
+  mutualCount: number;
+
+  @ApiProperty({ description: '친구관계 소스' })
+  sourceId: string;
+
+  @ApiProperty({ description: '친구관계 타겟' })
+  targetId: string;
 }
