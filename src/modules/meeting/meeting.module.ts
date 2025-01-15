@@ -8,6 +8,7 @@ import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository
 import { NotificationService } from '../notification/notification.service';
 import { NOTIFICATION_REPO, NotificationRepository } from '../repositories/notification.repository';
 import { NotificationModule } from '../notification/notification.module';
+import { FcmService } from '../notification/fcm.service';
 
 @Module({
   imports: [NotificationModule],
@@ -15,6 +16,8 @@ import { NotificationModule } from '../notification/notification.module';
   providers: [
     MeetingService,
     NotificationService,
+    UserRepository,
+    FcmService,
     {
       provide: NOTIFICATION_REPO,
       useClass: NotificationRepository,
