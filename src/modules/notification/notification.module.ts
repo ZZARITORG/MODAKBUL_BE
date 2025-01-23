@@ -3,10 +3,12 @@ import { NotificationRepository } from '../repositories/notification.repository'
 import { NotificationController } from './notification.controller';
 import { NotificationService } from './notification.service';
 import { SseService } from './sse.service';
+import { UserRepository } from '../repositories/user.repository';
+import { FcmService } from './fcm.service';
 
 @Module({
   controllers: [NotificationController],
-  providers: [NotificationRepository, NotificationService, SseService],
+  providers: [NotificationRepository, NotificationService, SseService, UserRepository, FcmService],
   exports: [NotificationRepository, SseService],
 })
 export class NotificationModule {}

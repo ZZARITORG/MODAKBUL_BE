@@ -310,7 +310,7 @@ export class FriendRepository extends Repository<FriendShip> {
     const sourceUser = await this.dataSource.getRepository(User).findOne({ where: { id: sourceId } });
     const targetUser = await this.dataSource.getRepository(User).findOne({ where: { id: friendDeleteDto.target_id } });
 
-    const friendship = await this.findFriendship(sourceUser.id, targetUser.id, FriendStatus.ACCEPTED);
+    const friendship = await this.findFriendshipByIds(sourceUser.id, targetUser.id);
 
     if (!friendship) {
       this.logger.log(`친구 관계가 존재하지 않습니다.`);
