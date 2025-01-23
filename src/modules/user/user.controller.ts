@@ -2,15 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/comm
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserIdReqDto } from 'src/common/dto/user-id-req-dto';
+import { GetOtherResDto } from './dtos/get-other-res-dto';
 import { GetUserResDto } from './dtos/get-user-res-dto';
-import { UserSearchResponseDto } from './dtos/search-user-res-dto';
+import { UserSearchDto } from './dtos/search-user-dto';
+import { UserSearchResDto } from './dtos/search-user-res-dto';
+import { UidReqDto } from './dtos/uid-req-dto';
+import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import { UserService } from './user.service';
-import { GetOtherResDto } from './dtos/get-other-res-dto';
-import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
-import { UserSearchDto } from './dtos/search-user-dto';
-import { UidReqDto } from './dtos/uid-req-dto';
 
 @Controller('user')
 @ApiTags('USER')
@@ -20,8 +20,8 @@ export class UserController {
   @ApiOperation({ summary: '유저 검색 API' })
   @ApiBearerAuth()
   @Get()
-  async searchUsers(@Query() query: UserSearchDto): Promise<UserSearchResponseDto[]> {
-    return this.userService.searchUsers(query);
+  async searchUsers(@CurrentUser() id: string, @Query() query: UserSearchDto): Promise<UserSearchResDto> {
+    return this.userService.searchUsers(id, query);
   }
 
   @ApiOperation({ summary: '본인 정보 조회 API' })
