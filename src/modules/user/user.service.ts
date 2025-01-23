@@ -9,12 +9,13 @@ import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { GetUserResDto } from './dtos/get-user-res-dto';
 import { UserSearchDto } from './dtos/search-user-dto';
-import { UserSearchResponseDto } from './dtos/search-user-res-dto';
+import { UserSearchResDto, UserSearchResponseDto } from './dtos/search-user-res-dto';
 import { UpdateFcmReqDto } from './dtos/update-fcm-req-dto';
 import { UpdateResultResDto } from './dtos/update-result-res-dto';
 import { UpdateUserDto } from './dtos/update-user-dto';
 import * as admin from 'firebase-admin';
 import { readFileSync } from 'fs';
+import { FriendStatus } from 'src/common/db/entities/friendship.entity';
 
 @Injectable()
 export class UserService {
@@ -41,15 +42,17 @@ export class UserService {
     }
   }
 
-  async searchUsers(query: UserSearchDto): Promise<UserSearchResponseDto[]> {
+  async searchUsers(id: string, query: UserSearchDto): Promise<UserSearchResDto> {
     const search = query.search;
     const page = query.page;
+    let isEnd = false;
 
-    const users = await this.userRepo.find({
+    const [users, total] = await this.userRepo.findAndCount({
       where: [
         { name: Like(`%${search}%`) }, // 이름으로 검색
         { userId: Like(`%${search}%`) }, // ID로 검색
       ],
+      relations: ['sentFriendships', 'receivedFriendships', 'sentFriendships.target', 'receivedFriendships.source'],
       skip: page * 20 - 20,
       take: 20,
       order: {
@@ -57,13 +60,31 @@ export class UserService {
       },
     });
 
+    if (total == 0) {
+      return {
+        users: [],
+        isEnd: true,
+      };
+    }
+
+    if (Math.ceil(total / 20) == page) {
+      isEnd = true;
+    }
+
+    const filteredUsers = users.filter((user) => {
+      const isBlockedBySent = !user.sentFriendships.some(
+        (friendship) => friendship.target.id === id && friendship.status === FriendStatus.BLOCKED,
+      );
+
+      const isBlockedByReceived = !user.receivedFriendships.some(
+        (friendship) => friendship.source.id === id && friendship.status === FriendStatus.BLOCKED,
+      );
+
+      return isBlockedBySent && isBlockedByReceived;
+    });
+
     // UserResponseDto로 매핑
-    return users.map((user) => ({
-      id: user.id,
-      userId: user.userId,
-      name: user.name,
-      profileUrl: user.profileUrl,
-    }));
+    return { users: plainToInstance(UserSearchResponseDto, filteredUsers, { excludeExtraneousValues: true }), isEnd };
   }
 
   async getUsers(userId: string): Promise<GetUserResDto> {

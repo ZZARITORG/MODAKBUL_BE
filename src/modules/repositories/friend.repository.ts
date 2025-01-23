@@ -346,6 +346,8 @@ export class FriendRepository extends Repository<FriendShip> {
       };
     });
 
+    friends.sort((a, b) => a.name.localeCompare(b.name));
+
     return friends; // 친구 정보 반환
   }
   async getFriendReq(userId: string): Promise<FriendInfoDto[]> {
