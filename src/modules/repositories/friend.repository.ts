@@ -90,7 +90,7 @@ export class FriendRepository extends Repository<FriendShip> {
       throw new NotFoundException('Source User not found');
     }
 
-    // 사용자가 아는 친구 목록 조회
+    // 사용자의 친구 목록 가져오기 (이미 친구인 사용자 배제하기 위해)
     const friendships = await this.find({
       where: [
         { source: { id: sourceUser.id }, status: FriendStatus.ACCEPTED },
@@ -99,8 +99,9 @@ export class FriendRepository extends Repository<FriendShip> {
       relations: ['source', 'target'],
     });
 
-    // 친구 목록에서 각각의 친구의 친구 목록을 찾기
-    const suggestedFriends: FriendSuggestionDto[] = [];
+    const friendIds = new Set(friendships.map((f) => (f.source.id === sourceUser.id ? f.target.id : f.source.id)));
+
+    const suggestedFriends = new Map<string, FriendSuggestionDto>(); // 중복 추천 방지
 
     for (const friendship of friendships) {
       const friend = friendship.source.id === sourceUser.id ? friendship.target : friendship.source;
@@ -118,47 +119,56 @@ export class FriendRepository extends Repository<FriendShip> {
         const friendOfFriend =
           friendFriendship.source.id === friend.id ? friendFriendship.target : friendFriendship.source;
 
-        // 이미 친구인 경우는 제외
-        if (friendOfFriend.id === sourceUser.id || suggestedFriends.some((s) => s.id === friendOfFriend.id)) {
+        // 이미 친구이거나 본인이면 제외
+        if (friendIds.has(friendOfFriend.id) || friendOfFriend.id === sourceUser.id) {
           continue;
         }
 
         // 함께 아는 친구 수 계산
         const mutualFriendCount = await this.getMutualFriendCount(sourceUser.id, friendOfFriend.id);
 
-        suggestedFriends.push({
-          id: friendOfFriend.id,
-          userId: friendOfFriend.userId,
-          name: friendOfFriend.name,
-          profileUrl: friendOfFriend.profileUrl,
-          mutualFriendCount,
-        });
-        if (contactList && contactList.length > 0) {
-          const contacts = await this.dataSource.getRepository(User).find({
-            where: {
-              phoneNo: In(contactList), // 연락처 배열에 포함된 사용자 검색
-            },
+        if (!suggestedFriends.has(friendOfFriend.id)) {
+          suggestedFriends.set(friendOfFriend.id, {
+            id: friendOfFriend.id,
+            userId: friendOfFriend.userId,
+            name: friendOfFriend.name,
+            profileUrl: friendOfFriend.profileUrl,
+            mutualFriendCount,
           });
-          for (const contact of contacts) {
-            // 이미 추천된 사용자나 현재 사용자인 경우 제외
-            if (contact.id === sourceUser.id || suggestedFriends.some((s) => s.id === contact.id)) {
-              continue;
-            }
-            // 함께 아는 친구 수 계산
-            const mutualFriendCount = await this.getMutualFriendCount(sourceUser.id, contact.id);
-            suggestedFriends.push({
-              id: contact.id,
-              userId: contact.userId,
-              name: contact.name,
-              profileUrl: contact.profileUrl,
-              mutualFriendCount, // 연락처 기반 추천이므로 기본 값으로 설정
-            });
-          }
         }
       }
     }
 
-    return suggestedFriends;
+    // 연락처 기반 추천 추가
+    if (contactList && contactList.length > 0) {
+      const contacts = await this.dataSource.getRepository(User).find({
+        where: {
+          phoneNo: In(contactList),
+        },
+      });
+
+      for (const contact of contacts) {
+        // 본인이거나 이미 친구인 경우 제외
+        if (contact.id === sourceUser.id || friendIds.has(contact.id)) {
+          continue;
+        }
+
+        // 함께 아는 친구 수 계산
+        const mutualFriendCount = await this.getMutualFriendCount(sourceUser.id, contact.id);
+
+        if (!suggestedFriends.has(contact.id)) {
+          suggestedFriends.set(contact.id, {
+            id: contact.id,
+            userId: contact.userId,
+            name: contact.name,
+            profileUrl: contact.profileUrl,
+            mutualFriendCount,
+          });
+        }
+      }
+    }
+
+    return Array.from(suggestedFriends.values());
   }
 
   // 친구의 친구 목록에서 함께 아는 친구 수를 계산하는 함수
