@@ -423,6 +423,7 @@ export class MeetingRepository extends Repository<Meeting> {
       .leftJoinAndSelect('meeting.userMeetingRelations', 'userMeetingAll')
       .leftJoinAndSelect('userMeetingAll.user', 'participants')
       .where('meeting.date >= :currentDate', { currentDate: new Date() })
+      .andWhere('CAST(meeting.hostId AS TEXT) != CAST(:userId AS TEXT)', { userId })
       .select([
         'meeting.id',
         'meeting.createdAt',
