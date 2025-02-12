@@ -9,6 +9,6 @@ import { FcmService } from './fcm.service';
 @Module({
   controllers: [NotificationController],
   providers: [NotificationRepository, NotificationService, SseService, UserRepository, FcmService],
-  exports: [NotificationRepository, SseService],
+  exports: [NotificationService, NotificationRepository, SseService],
 })
 export class NotificationModule {}
