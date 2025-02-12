@@ -5,9 +5,10 @@ import { UserController } from './user.controller';
 import { User } from 'src/common/db/entities/user.entity';
 import { USER_REPO, UserRepository } from '../repositories/user.repository';
 import { FRIEND_REPO, FriendRepository } from '../repositories/friend.repository';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), NotificationModule],
   controllers: [UserController],
   providers: [
     UserService,
