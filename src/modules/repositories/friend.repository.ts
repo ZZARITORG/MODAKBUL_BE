@@ -12,12 +12,16 @@ import { FriendRejectDto } from '../friend/dtos/friend-reject-dto';
 import { FriendListDto } from '../friend/dtos/friend-list-dto';
 import { Group } from 'src/common/db/entities/group.entity';
 import { FriendSuggestionDto } from '../friend/dtos/firend-suggest-dto';
+import { NotificationService } from '../notification/notification.service';
 export const FRIEND_REPO = 'FRIEND_REPO';
 
 @Injectable()
 export class FriendRepository extends Repository<FriendShip> {
   private readonly logger = new Logger(FriendRepository.name);
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private readonly notificationService: NotificationService,
+  ) {
     super(FriendShip, dataSource.createEntityManager());
   }
   private async createNotification(
@@ -79,7 +83,11 @@ export class FriendRepository extends Repository<FriendShip> {
         status: FriendStatus.PENDING, // 최초 상태로 PENDING 설정
       });
       this.logger.log(`새로운 친구 요청을 생성합니다: ${JSON.stringify(friendship)}`);
-      await this.createNotification(sourceUser.id, targetUser.id, NotificationType.FRIEND_REQUEST); // 알림 생성
+      await this.notificationService.createNotification({
+        sourceUserId: sourceUser.id,
+        targetUserId: targetUser.id,
+        type: NotificationType.FRIEND_REQUEST, // 친구요청
+      });
       return await this.save(friendship);
     }
   }
