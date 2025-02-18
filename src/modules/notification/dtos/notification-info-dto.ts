@@ -13,6 +13,10 @@ export class NotificationInfoDto {
   sourceUserId: string;
   @ApiProperty({ description: '보낸사람유저이름' })
   sourceUserName: string;
+  @ApiProperty({ description: '보낸사람유저프로필URL' })
+  sourceUserProfileUrl: string;
   @ApiProperty({ description: '만들어진 시간' })
   createdAt: Date;
+  @ApiProperty({ description: '만들어진 시간' })
+  meetingId: string;
 }

@@ -101,8 +101,14 @@ export class FriendRepository extends Repository<FriendShip> {
     // 사용자의 친구 목록 가져오기 (이미 친구인 사용자 배제하기 위해)
     const friendships = await this.find({
       where: [
-        { source: { id: sourceUser.id }, status: FriendStatus.ACCEPTED },
-        { target: { id: sourceUser.id }, status: FriendStatus.ACCEPTED },
+        {
+          source: { id: sourceUser.id },
+          status: In([FriendStatus.ACCEPTED, FriendStatus.PENDING, FriendStatus.BLOCKED]),
+        },
+        {
+          target: { id: sourceUser.id },
+          status: In([FriendStatus.ACCEPTED, FriendStatus.PENDING, FriendStatus.BLOCKED]),
+        },
       ],
       relations: ['source', 'target'],
     });
