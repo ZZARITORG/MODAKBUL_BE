@@ -34,7 +34,7 @@ export class GroupMember extends BaseTable {
   @JoinColumn({ name: 'group_id' })
   group: Group;
 
-  @ManyToOne(() => User, (user) => user.groupMembers)
+  @ManyToOne(() => User, (user) => user.groupMembers, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
