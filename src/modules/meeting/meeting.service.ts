@@ -65,6 +65,8 @@ export class MeetingService {
         meetingId: savedMeeting.id, // 미팅 ID
       });
     }
+
+    return savedMeeting;
   }
   async acceptMeeting(acceptMeetingReqDto: ChangeStatusMeetingReqDto, userId: string) {
     const meeting = await this.meetingRepo.acceptMeeting(acceptMeetingReqDto, userId);
