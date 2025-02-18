@@ -24,18 +24,27 @@ export class NotificationRepository extends Repository<Notification> {
       relations: ['sourceUser'], // 알림을 보낸 사용자 정보도 가져오기
     });
 
-    const notificationInfos = notifications.map((notification) => {
-      return {
-        id: notification.id,
-        type: notification.type,
-        sourceUserId: notification.sourceUser.userId,
-        createdAt: notification.createdAt,
-        sourceUserName: notification.sourceUser.name,
-        meetingId: notification.meetingId,
-      };
-    });
+    // 모든 프로필 URL 조회를 병렬 실행
+    const notificationInfos = await Promise.all(
+      notifications.map(async (notification) => {
+        const sourceUserProfile = await this.dataSource.getRepository(User).findOne({
+          where: { id: notification.sourceUser.id },
+          select: ['profileUrl'], // profileUrl만 가져오기
+        });
 
-    return notificationInfos; // 친구 정보 반환
+        return {
+          id: notification.id,
+          type: notification.type,
+          sourceUserId: notification.sourceUser.userId,
+          createdAt: notification.createdAt,
+          sourceUserName: notification.sourceUser.name,
+          sourceUserProfileUrl: sourceUserProfile?.profileUrl || null, // 가져온 프로필 URL 적용
+          meetingId: notification.meetingId,
+        };
+      }),
+    );
+
+    return notificationInfos;
   }
 
   // 10분마다 30~40분 후 미팅 있는 유저들에게 알림전송
