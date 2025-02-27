@@ -38,7 +38,7 @@ export class AuthService {
 
     const payload = { id: user.id };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '2h' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '30d' });
+    const refreshToken = this.jwtService.sign(payload, { secret: process.env.REFRESH_TOKEN_SECRET, expiresIn: '30d' });
 
     return {
       accessToken,
@@ -58,7 +58,7 @@ export class AuthService {
 
   async refreshAccessToken(refreshToken: string) {
     try {
-      const decoded = this.jwtService.verify(refreshToken);
+      const decoded = this.jwtService.verify(refreshToken, { secret: process.env.REFRESH_TOKEN_SECRET });
       const user = await this.userRepo.findUserById(decoded.id);
 
       const newAccessToken = this.jwtService.sign({ id: user.id }, { expiresIn: '2h' });
