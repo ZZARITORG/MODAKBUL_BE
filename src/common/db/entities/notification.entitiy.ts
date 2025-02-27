@@ -23,10 +23,10 @@ export class Notification extends BaseTable {
   // })
 
   // user: User; // 요청을 받은 사람의 UUID를 저장
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   sourceUser: User; // 친구 요청을 보낸 사람의 UUID를 저장
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   targetUser: User; // 친구 요청을 보낸 사람의 UUID를 저장
 
   @Column({ type: 'uuid', nullable: true }) // 약속 UUID를 저장 (null 가능)
