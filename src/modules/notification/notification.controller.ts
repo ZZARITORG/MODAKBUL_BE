@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 import { SseService } from './sse.service';
 import { map } from 'rxjs/operators';
 
-@Controller('notification')
+@Controller({ path: 'notification', version: '0' })
 @ApiTags('NOTIFICATION')
 export class NotificationController {
   constructor(

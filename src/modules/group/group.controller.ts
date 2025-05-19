@@ -8,7 +8,7 @@ import { GetGroupListResDto } from './dtos/get-group-list-res-dto';
 import { GroupService } from './group.service';
 import { GroupIdReqDto } from 'src/common/dto/group-id-req-dto';
 
-@Controller('group')
+@Controller({ path: 'group', version: '0' })
 @ApiTags('GROUP')
 export class GroupController {
   constructor(private readonly groupService: GroupService) {}

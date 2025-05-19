@@ -13,7 +13,7 @@ import { RefreshTokenResDto } from './dtos/refresh-token-res-dto';
 import { TokenResDto } from './dtos/token-res-dto';
 import { VerifyPhoneNoReqDto } from './dtos/verify-phone-no-req-dto';
 
-@Controller('auth')
+@Controller({ path: 'auth', version: '0' })
 @ApiTags('AUTH')
 export class AuthController {
   constructor(

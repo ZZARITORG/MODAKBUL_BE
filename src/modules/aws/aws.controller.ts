@@ -3,9 +3,8 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/common/decorators/public.decorator';
 import { FileNameReqDto } from 'src/common/dto/file-name-req-dto';
 import { AwsService } from './aws.service';
-const fs = require('fs');
 
-@Controller('aws')
+@Controller({ path: 'aws', version: '0' })
 @ApiTags('AWS')
 export class AwsController {
   constructor(private readonly awsService: AwsService) {}
