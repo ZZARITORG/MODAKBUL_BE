@@ -9,7 +9,7 @@ import { FriendDeleteDto } from './dtos/friend-delete-dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FriendContactDto } from './dtos/firend-contact-dto';
 
-@Controller('friend')
+@Controller({ path: 'friend', version: '0' })
 @ApiTags('FRIEND')
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}

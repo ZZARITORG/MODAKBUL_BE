@@ -13,7 +13,7 @@ import { PendingMeetingResDto } from './dtos/response/pending-meeting-res-dto';
 import { MeetingService } from './meeting.service';
 import { MeetingIdReqDto } from './dtos/request/meeting-id-req-dto';
 
-@Controller('meeting')
+@Controller({ path: 'meeting', version: '0' })
 @ApiTags('MEETING')
 export class MeetingController {
   constructor(private readonly meetingService: MeetingService) {}
